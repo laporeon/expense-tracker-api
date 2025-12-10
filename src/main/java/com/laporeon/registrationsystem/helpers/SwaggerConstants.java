@@ -18,7 +18,8 @@ public class SwaggerConstants {
               "message": "Validation failed",
               "details": {
                 "email": "Invalid email",
-                "username": "Username must be between 6 and 25 characters"
+                "username": "Username must be between 6 and 25 characters",
+                "password": "Password must be 8-25 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
               },
               "timestamp": "2025-12-10T18:08:56.353210281Z"
             }
