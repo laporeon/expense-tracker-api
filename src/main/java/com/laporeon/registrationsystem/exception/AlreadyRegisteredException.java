@@ -1,0 +1,7 @@
+package com.laporeon.registrationsystem.exception;
+
+public class AlreadyRegisteredException extends RuntimeException {
+    public AlreadyRegisteredException(String message) {
+        super(message);
+    }
+}
