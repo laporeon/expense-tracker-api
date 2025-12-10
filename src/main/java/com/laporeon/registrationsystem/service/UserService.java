@@ -6,12 +6,14 @@ import com.laporeon.registrationsystem.entity.User;
 import com.laporeon.registrationsystem.exception.AlreadyRegisteredException;
 import com.laporeon.registrationsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
     public UserResponseDTO createUser(UserRequestDTO dto) {
@@ -20,6 +22,7 @@ public class UserService {
         User user = User.builder()
                         .username(dto.username())
                         .email(dto.email())
+                        .password(passwordEncoder.encode(dto.password()))
                         .build();
 
         userRepository.save(user);
