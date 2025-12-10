@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -22,8 +23,10 @@ public class User {
     @MongoId
     private String id;
 
+    @Indexed(unique = true, name = "idx_username")
     private String username;
 
+    @Indexed(unique = true, name = "idx_email")
     private String email;
 
     @Field(name = "created_at")
