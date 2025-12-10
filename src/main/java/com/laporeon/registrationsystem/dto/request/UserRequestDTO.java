@@ -10,6 +10,13 @@ public record UserRequestDTO(
         @Size(min = 6, max = 25, message = "Username must be between {min} and {max} characters")
         @Schema(example = "username")
         String username,
+        @NotBlank(message = "Password is required")
+        @Pattern(
+                regexp = "^(?=\\S{8,25}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).*$",
+                message = "Password must be 8-25 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
+        )
+        @Schema(example = "#P4ssword_")
+        String password,
         @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email")
         @NotBlank(message = "Email is required")
         @Schema(example = "user@gmail.com")
