@@ -29,6 +29,8 @@ public class User {
     @Indexed(unique = true, name = "idx_email")
     private String email;
 
+    private String password;
+
     @Field(name = "created_at")
     @CreatedDate
     private LocalDateTime createdAt;
