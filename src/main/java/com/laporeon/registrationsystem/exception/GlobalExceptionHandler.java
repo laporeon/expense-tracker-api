@@ -3,6 +3,7 @@ package com.laporeon.registrationsystem.exception;
 import com.laporeon.registrationsystem.dto.response.ErrorResponseDTO;
 import com.laporeon.registrationsystem.dto.response.ValidationErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -35,6 +36,19 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(AlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
+        log.error("Email or username already registered {}", ex.getMessage());
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                Instant.now());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+    
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleException(Exception ex) {
