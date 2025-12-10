@@ -1,4 +1,4 @@
-package com.laporeon.user_registration_system;
+package com.laporeon.registrationsystem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
