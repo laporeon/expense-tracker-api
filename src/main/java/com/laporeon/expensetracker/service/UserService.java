@@ -1,11 +1,13 @@
-package com.laporeon.registrationsystem.service;
+package com.laporeon.expensetracker.service;
 
-import com.laporeon.registrationsystem.dto.request.UserRequestDTO;
-import com.laporeon.registrationsystem.dto.response.UserResponseDTO;
-import com.laporeon.registrationsystem.entity.User;
-import com.laporeon.registrationsystem.exception.AlreadyRegisteredException;
-import com.laporeon.registrationsystem.exception.EmailNotFoundException;
-import com.laporeon.registrationsystem.repository.UserRepository;
+import com.laporeon.expensetracker.dto.request.RegisterUserRequestDTO;
+import com.laporeon.expensetracker.dto.request.UpdateUserRequestDTO;
+import com.laporeon.expensetracker.dto.response.AuthResponseDTO;
+import com.laporeon.expensetracker.dto.response.UpdateUserResponseDTO;
+import com.laporeon.expensetracker.entity.User;
+import com.laporeon.expensetracker.exception.AlreadyRegisteredException;
+import com.laporeon.expensetracker.exception.UserNotFoundException;
+import com.laporeon.expensetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public UserResponseDTO createUser(UserRequestDTO dto) {
-        ensureUniqueFields(dto);
+    public AuthResponseDTO register(RegisterUserRequestDTO dto) {
+        ensureUniqueFields(dto.username(), dto.email());
 
         User user = User.builder()
                         .username(dto.username())
@@ -29,38 +31,39 @@ public class UserService {
 
         userRepository.save(user);
 
-        return new UserResponseDTO(
-                user.getId(),
+        return new AuthResponseDTO(
+                user.getUsername(),
+                user.getEmail()
+        );
+    }
+
+    public UpdateUserResponseDTO update(String id, UpdateUserRequestDTO dto) {
+        User user = userRepository.findById(id).filter(User::isActive).orElseThrow(
+                () -> new UserNotFoundException("User not found")
+        );
+
+        ensureUniqueFields(null, dto.email());
+
+        user.setEmail(dto.email());
+
+        userRepository.save(user);
+
+        return new UpdateUserResponseDTO(
                 user.getUsername(),
                 user.getEmail(),
-                user.getCreatedAt(),
                 user.getUpdatedAt()
         );
     }
 
-    public void deleteUser(String email) {
-        User user = userRepository.findByEmail(email).filter(User::isActive).orElseThrow(
-                () -> new EmailNotFoundException("Email not found")
-        );
 
-        user.setActive(false);
-
-        userRepository.save(user);
-    }
-
-    private void ensureUniqueFields(UserRequestDTO dto) {
-        if (userRepository.existsByUsernameAndEmail(dto.username(), dto.email())) {
-            throw new AlreadyRegisteredException("Email and username already in use");
-        }
-
-        if (userRepository.existsByEmail(dto.email())) {
-            throw new AlreadyRegisteredException("Email already registered");
-        }
-
-        if (userRepository.existsByUsername(dto.username())) {
+    private void ensureUniqueFields(String username, String email) {
+        if (username != null && !username.isEmpty() && userRepository.existsByUsername(username)) {
             throw new AlreadyRegisteredException("Username already taken");
         }
-    }
 
+        if (email != null && !email.isEmpty() && userRepository.existsByEmail(email)) {
+            throw new AlreadyRegisteredException("Email already registered");
+        }
+    }
 
 }
