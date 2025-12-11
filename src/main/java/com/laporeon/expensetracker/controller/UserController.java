@@ -1,11 +1,11 @@
-package com.laporeon.registrationsystem.controller;
+package com.laporeon.expensetracker.controller;
 
-import com.laporeon.registrationsystem.dto.request.UserRequestDTO;
-import com.laporeon.registrationsystem.dto.response.ErrorResponseDTO;
-import com.laporeon.registrationsystem.dto.response.UserResponseDTO;
-import com.laporeon.registrationsystem.dto.response.ValidationErrorResponseDTO;
-import com.laporeon.registrationsystem.helpers.SwaggerConstants;
-import com.laporeon.registrationsystem.service.UserService;
+import com.laporeon.expensetracker.dto.request.UpdateUserRequestDTO;
+import com.laporeon.expensetracker.dto.response.ErrorResponseDTO;
+import com.laporeon.expensetracker.dto.response.UpdateUserResponseDTO;
+import com.laporeon.expensetracker.dto.response.ValidationErrorResponseDTO;
+import com.laporeon.expensetracker.helpers.SwaggerConstants;
+import com.laporeon.expensetracker.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -27,17 +27,21 @@ public class UserController {
     private final UserService userService;
 
     @Operation(
-            summary = "Register a new user",
-            description = "Register a new user, ensuring email and username are unique.",
+            summary = "Update user profile",
+            description = "Updates a user's email and username using their unique identifier, ensuring the new email remains unique.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "User registered",
+                    @ApiResponse(responseCode = "200", description = "User information updated",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UserResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.USER_RESPONSE_EXAMPLE))),
+                                    schema = @Schema(implementation = UpdateUserResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.UPDATE_USER_RESPONSE_EXAMPLE))),
                     @ApiResponse(responseCode = "400", description = "Validation failed",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ValidationErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.VALIDATION_ERROR_EXAMPLE))),
+                    @ApiResponse(responseCode = "404", description = "User not found",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.USER_NOT_FOUND_ERROR_EXAMPLE))),
                     @ApiResponse(responseCode = "409", description = "Conflict",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
@@ -47,29 +51,10 @@ public class UserController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
             })
-    @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
-        UserResponseDTO response = userService.createUser(dto);
+    @PutMapping("/{id}")
+    public ResponseEntity<UpdateUserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
+        UpdateUserResponseDTO response = userService.update(id, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(
-            summary = "Delete an active user",
-            description = "Deletes user information based on the provided email address, only if the user account is currently active.",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Profile deleted"),
-                    @ApiResponse(responseCode = "404", description = "Validation failed",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ValidationErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.EMAIL_NOT_FOUND_ERROR_EXAMPLE))),
-                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
-            })
-    @DeleteMapping()
-    public ResponseEntity<Void> deleteUser(@RequestParam String email) {
-        userService.deleteUser(email);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
 }
