@@ -1,4 +1,4 @@
-package com.laporeon.registrationsystem.entity;
+package com.laporeon.expensetracker.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
