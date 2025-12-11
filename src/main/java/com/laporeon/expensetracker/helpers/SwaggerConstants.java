@@ -1,13 +1,18 @@
-package com.laporeon.registrationsystem.helpers;
+package com.laporeon.expensetracker.helpers;
 
 public class SwaggerConstants {
 
-    public static final String USER_RESPONSE_EXAMPLE = """
+    public static final String AUTH_RESPONSE_EXAMPLE = """
             {
-              "id": "6939b71c96d47dfc0e108ceb",
+              "username": "username",
+              "email": "user@gmail.com"
+            }
+            """;
+
+    public static final String UPDATE_USER_RESPONSE_EXAMPLE = """
+            {
               "username": "username",
               "email": "user@gmail.com",
-              "createdAt": "2025-12-10T18:08:28.824174472",
               "updatedAt": "2025-12-10T18:08:28.824174472"
             }
             """;
@@ -33,10 +38,10 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String EMAIL_NOT_FOUND_ERROR_EXAMPLE = """
+    public static final String USER_NOT_FOUND_ERROR_EXAMPLE = """
             {
               "status": 404,
-              "message": "Email not found",
+              "message": "User not found",
               "timestamp": "2025-12-11T18:02:20.152685443Z"
             }
             """;
