@@ -1,7 +1,7 @@
-package com.laporeon.registrationsystem.exception;
+package com.laporeon.expensetracker.exception;
 
-import com.laporeon.registrationsystem.dto.response.ErrorResponseDTO;
-import com.laporeon.registrationsystem.dto.response.ValidationErrorResponseDTO;
+import com.laporeon.expensetracker.dto.response.ErrorResponseDTO;
+import com.laporeon.expensetracker.dto.response.ValidationErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +36,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(EmailNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleEmailNotFoundException(EmailNotFoundException ex) {
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(UserNotFoundException ex) {
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.NOT_FOUND.value(),
