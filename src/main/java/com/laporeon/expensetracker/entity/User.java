@@ -31,6 +31,9 @@ public class User {
 
     private String password;
 
+    @Field(name = "is_active")
+    private boolean isActive;
+
     @Field(name = "created_at")
     @CreatedDate
     private LocalDateTime createdAt;

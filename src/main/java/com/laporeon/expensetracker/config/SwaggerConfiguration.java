@@ -1,4 +1,4 @@
-package com.laporeon.registrationsystem.config;
+package com.laporeon.expensetracker.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -13,8 +13,8 @@ public class SwaggerConfiguration {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Registration System API")
-                                .description("Documentation for Registration System API.")
+                                .title("Expense Tracker API")
+                                .description("Documentation for Expense Tracker API.")
                                 .version("1.0.0"));
     }
 }

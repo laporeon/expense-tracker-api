@@ -4,6 +4,7 @@ import com.laporeon.registrationsystem.dto.request.UserRequestDTO;
 import com.laporeon.registrationsystem.dto.response.UserResponseDTO;
 import com.laporeon.registrationsystem.entity.User;
 import com.laporeon.registrationsystem.exception.AlreadyRegisteredException;
+import com.laporeon.registrationsystem.exception.EmailNotFoundException;
 import com.laporeon.registrationsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,7 @@ public class UserService {
                         .username(dto.username())
                         .email(dto.email())
                         .password(passwordEncoder.encode(dto.password()))
+                        .isActive(true)
                         .build();
 
         userRepository.save(user);
@@ -34,6 +36,16 @@ public class UserService {
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
+    }
+
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email).filter(User::isActive).orElseThrow(
+                () -> new EmailNotFoundException("Email not found")
+        );
+
+        user.setActive(false);
+
+        userRepository.save(user);
     }
 
     private void ensureUniqueFields(UserRequestDTO dto) {
@@ -49,4 +61,6 @@ public class UserService {
             throw new AlreadyRegisteredException("Username already taken");
         }
     }
+
+
 }

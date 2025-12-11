@@ -52,4 +52,24 @@ public class UserController {
         UserResponseDTO response = userService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @Operation(
+            summary = "Delete an active user",
+            description = "Deletes user information based on the provided email address, only if the user account is currently active.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Profile deleted"),
+                    @ApiResponse(responseCode = "404", description = "Validation failed",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ValidationErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EMAIL_NOT_FOUND_ERROR_EXAMPLE))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+            })
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteUser(@RequestParam String email) {
+        userService.deleteUser(email);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

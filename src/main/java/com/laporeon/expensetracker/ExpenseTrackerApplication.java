@@ -1,13 +1,13 @@
-package com.laporeon.registrationsystem;
+package com.laporeon.expensetracker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RegistrationSystemApplication {
+public class ExpenseTrackerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RegistrationSystemApplication.class, args);
+		SpringApplication.run(ExpenseTrackerApplication.class, args);
 	}
 
 }

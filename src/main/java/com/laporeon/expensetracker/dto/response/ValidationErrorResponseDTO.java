@@ -1,4 +1,4 @@
-package com.laporeon.registrationsystem.dto.response;
+package com.laporeon.expensetracker.dto.response;
 
 import java.time.Instant;
 import java.util.Map;
