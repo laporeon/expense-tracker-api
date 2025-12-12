@@ -3,10 +3,12 @@ package com.laporeon.expensetracker.controller;
 import com.laporeon.expensetracker.dto.request.CreateExpenseDTO;
 import com.laporeon.expensetracker.dto.response.ErrorResponseDTO;
 import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
+import com.laporeon.expensetracker.dto.response.PageResponseDTO;
 import com.laporeon.expensetracker.dto.response.ValidationErrorResponseDTO;
 import com.laporeon.expensetracker.helpers.SwaggerConstants;
 import com.laporeon.expensetracker.service.ExpenseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,12 +16,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +57,36 @@ public class ExpenseController {
     public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto) {
         ExpenseResponseDTO response = expenseService.addExpense(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(
+            summary = "List all expenses",
+            description = "Retrieves a paginated and sorted list of expenses, allowing the client to control page number, page size, sort field and sort direction.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Expenses page successfully retrieved",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExpenseResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSES_PAGE_RESPONSE))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+            })
+    @GetMapping()
+    public ResponseEntity<PageResponseDTO> listAllExpenses(
+            @Parameter(description = "Page number")
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @Parameter(description = "Entity field used for sorting (e.g. name, amount, date)")
+            @RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
+            @Parameter(description = "Sort direction (ASC or DESC)")
+            @RequestParam(value = "direction", defaultValue = "ASC") String direction
+    ) {
+        Pageable pageable = PageRequest.of(page, size,
+                                           Sort.by(Sort.Direction.valueOf(direction.toUpperCase()), orderBy));
+
+        PageResponseDTO<ExpenseResponseDTO> expenses = expenseService.listAllExpenses(pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(expenses);
     }
 }
