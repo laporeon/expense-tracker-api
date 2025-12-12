@@ -51,7 +51,7 @@ public class SwaggerConstants {
               "description": "Amazon Prime subscription",
               "amount": 19.90,
               "category": "streaming",
-              "date": "2025-12-12"
+              "expenseDate": "2025-12-12"
             }
             """;
 
@@ -66,6 +66,31 @@ public class SwaggerConstants {
                 "description": "Description must be between 10-50 characters long"
               },
               "timestamp": "2025-12-12T16:36:02.562839957Z"
+            }
+            """;
+
+    public static final String EXPENSES_PAGE_RESPONSE = """
+            {
+              "content": [
+                {
+                  "id": "693c44c3080f9f897b29be50",
+                  "name": "Prime Video",
+                  "description": "Amazon Prime subscription",
+                  "amount": 19.90,
+                  "category": "entertainment",
+                  "expenseDate": "2025-12-12"
+                }
+              ],
+              "pageNumber": 0,
+              "pageSize": 10,
+              "totalPages": 1,
+              "totalElements": 1,
+              "numberOfElements": 1,
+              "isFirstPage": true,
+              "isLastPage": true,
+              "isEmpty": false,
+              "isSorted": true,
+              "isUnsorted": false
             }
             """;
 
@@ -104,12 +129,24 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String LIST_CATEGORIES_RESPONSE = """
-            [
-                { "name": "health" },
-                { "name": "food" },
-                { "name": "others" }
-            ]
+    public static final String CATEGORIES_PAGE_RESPONSE = """
+            {
+              "content": [
+                    { "name": "health" },
+                    { "name": "food" },
+                    { "name": "others" }
+              ],
+              "pageNumber": 0,
+              "pageSize": 10,
+              "totalPages": 1,
+              "totalElements": 3,
+              "numberOfElements": 3,
+              "isFirstPage": true,
+              "isLastPage": true,
+              "isEmpty": false,
+              "isSorted": true,
+              "isUnsorted": false
+            }
             """;
 
     // ===== COMMON EXAMPLES =====
