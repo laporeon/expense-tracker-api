@@ -36,8 +36,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(UserNotFoundException ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFoundException(ResourceNotFoundException ex) {
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.NOT_FOUND.value(),
@@ -49,8 +49,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AlreadyRegisteredException.class)
     public ResponseEntity<ErrorResponseDTO> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
-        log.error("Email or username already registered {}", ex.getMessage());
-
+        
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),

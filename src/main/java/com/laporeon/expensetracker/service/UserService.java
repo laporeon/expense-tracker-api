@@ -6,7 +6,7 @@ import com.laporeon.expensetracker.dto.response.AuthResponseDTO;
 import com.laporeon.expensetracker.dto.response.UpdateUserResponseDTO;
 import com.laporeon.expensetracker.entity.User;
 import com.laporeon.expensetracker.exception.AlreadyRegisteredException;
-import com.laporeon.expensetracker.exception.UserNotFoundException;
+import com.laporeon.expensetracker.exception.ResourceNotFoundException;
 import com.laporeon.expensetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +39,7 @@ public class UserService {
 
     public UpdateUserResponseDTO update(String id, UpdateUserRequestDTO dto) {
         User user = userRepository.findById(id).filter(User::isActive).orElseThrow(
-                () -> new UserNotFoundException("User not found")
+                () -> new ResourceNotFoundException("User not found")
         );
 
         ensureUniqueFields(null, dto.email());
