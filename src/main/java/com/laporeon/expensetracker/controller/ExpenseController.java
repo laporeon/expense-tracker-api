@@ -1,0 +1,59 @@
+package com.laporeon.expensetracker.controller;
+
+import com.laporeon.expensetracker.dto.request.CreateExpenseDTO;
+import com.laporeon.expensetracker.dto.response.ErrorResponseDTO;
+import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
+import com.laporeon.expensetracker.dto.response.ValidationErrorResponseDTO;
+import com.laporeon.expensetracker.helpers.SwaggerConstants;
+import com.laporeon.expensetracker.service.ExpenseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("api/v1/expenses")
+@Tag(name = "Expenses")
+public class ExpenseController {
+
+    private final ExpenseService expenseService;
+
+    @Operation(
+            summary = "Create a new expense",
+            description = "Creates a new expense entry associated with a valid category. " +
+                    "The expense amount must be greater than zero and the category must exist.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Expense successfully created",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExpenseResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSE_CREATED_RESPONSE))),
+                    @ApiResponse(responseCode = "400", description = "Validation failed",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ValidationErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSE_INVALID_BODY_ERROR))),
+                    @ApiResponse(responseCode = "404", description = "Category not found",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.CATEGORY_NOT_FOUND_ERROR))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+            })
+    @PostMapping()
+    public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto) {
+        ExpenseResponseDTO response = expenseService.addExpense(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}
