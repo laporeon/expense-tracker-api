@@ -11,6 +11,7 @@ import com.laporeon.expensetracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +38,20 @@ public class UserService {
         );
     }
 
+    @Transactional
     public UpdateUserResponseDTO update(String id, UpdateUserRequestDTO dto) {
-        User user = userRepository.findById(id).filter(User::isActive).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
-        );
+        User user = userRepository.findById(id)
+                                  .filter(User::isActive)
+                                  .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        if (dto.email() != null && !dto.email().isBlank()) {
+            ensureUniqueFields(user.getEmail(), dto.email());
+            user.setEmail(dto.email());
+        }
 
-        ensureUniqueFields(null, dto.email());
-
-        user.setEmail(dto.email());
+        if (dto.password() != null && !dto.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.password()));
+        }
 
         userRepository.save(user);
 
@@ -55,6 +62,26 @@ public class UserService {
         );
     }
 
+    @Transactional
+    public void deleteUser(String id) {
+        userRepository.findById(id)
+                      .filter(u -> u.isActive())
+                      .ifPresentOrElse(
+                              user -> { user.setActive(false); userRepository.save(user); },
+                              () -> { throw new ResourceNotFoundException("User not found"); }
+                      );
+    }
+
+
+    @Transactional
+    public void reactivate(String id) {
+        userRepository.findById(id)
+                      .filter(u -> !u.isActive())
+                      .ifPresentOrElse(
+                              user -> { user.setActive(true); userRepository.save(user); },
+                              () -> { throw new ResourceNotFoundException("User not found"); }
+                      );
+    }
 
     private void ensureUniqueFields(String username, String email) {
         if (username != null && !username.isEmpty() && userRepository.existsByUsername(username)) {
