@@ -3,7 +3,7 @@ version: '3.9'
 services:
   app:
     build: .
-    container_name: registration-system-api
+    container_name: expense-tracker-api
     ports:
       - "${PORT:-8080}:${PORT:-8080}"
     environment:
@@ -12,14 +12,14 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: ${MONGO_USER:-admin}
       MONGO_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
-      MONGO_DATABASE: ${MONGO_DATABASE:-registrationsystemdb}
+      MONGO_DATABASE: ${MONGO_DATABASE:-expensetrackerdb}
     depends_on:
       - mongodb
     networks:
-      - registration-system-network
+      - expense-tracker-network
 
   mongodb:
-    container_name: registration-system-database
+    container_name: expense-tracker-database
     image: mongo:latest
     restart: unless-stopped
     ports:
@@ -30,13 +30,13 @@ services:
     volumes:
       - mongodb_data:/data/db
     networks:
-      - registration-system-network
+      - expense-tracker-network
 
 volumes:
   mongodb_data:
     driver: local
 
 networks:
-  registration-system-network:
-    name: registration-system-network
+  expense-tracker-network:
+    name: expense-tracker-network
     driver: bridge
