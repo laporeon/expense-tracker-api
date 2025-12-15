@@ -68,4 +68,13 @@ public class ExpenseService {
                 expenses.getSort().isUnsorted()
         );
     }
+
+    public void deleteExpense(String id) {
+        expenseRepository.findById(id)
+                      .ifPresentOrElse(
+                              expenseRepository::delete,
+                              () -> {
+                                  throw new ResourceNotFoundException("Expense with id '%s' not found".formatted(id));
+                              });
+    }
 }
