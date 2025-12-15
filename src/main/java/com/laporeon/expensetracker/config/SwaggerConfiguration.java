@@ -2,6 +2,7 @@ package com.laporeon.expensetracker.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,21 @@ public class SwaggerConfiguration {
                 .info(
                         new Info()
                                 .title("Expense Tracker API")
-                                .description("Documentation for Expense Tracker API.")
-                                .version("1.0.0"));
+                                .description("""
+                                            A REST API for personal finance management.
+                                            
+                                            ## Features
+                                            - Expense tracking with categories
+                                            - User profile management
+                                            - Soft delete support
+                                            - Pagination and sorting
+                                            """)
+                                            .version("1.0.0")
+                                .license(
+                                        new License()
+                                                .name("MIT")
+                                                .url("https://opensource.org/licenses/MIT")
+                                )
+                );
     }
 }
