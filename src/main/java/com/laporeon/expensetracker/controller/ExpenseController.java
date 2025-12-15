@@ -89,4 +89,25 @@ public class ExpenseController {
         PageResponseDTO<ExpenseResponseDTO> expenses = expenseService.listAllExpenses(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(expenses);
     }
+
+    @Operation(
+            summary = "Delete an expense",
+            description = "Deletes an existing expense by its ID. Returns 204 when the expense is successfully deleted.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Expense successfully deleted"),
+                    @ApiResponse(responseCode = "404", description = "Expense not found",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSE_NOT_FOUND_ERROR))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+            })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {
+        expenseService.deleteExpense(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }
