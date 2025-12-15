@@ -55,6 +55,14 @@ public class SwaggerConstants {
             }
             """;
 
+    public static final String EXPENSE_NOT_FOUND_ERROR = """
+            {
+              "status": 404,
+              "message": "Expense with id '%693c44c3080f9f897b29be34' not found",
+              "timestamp": "2025-12-10T18:10:42.133880691Z"
+            }
+            """;
+
     public static final String EXPENSE_INVALID_BODY_ERROR = """
             {
               "status": 400,
