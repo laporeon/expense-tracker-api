@@ -1,5 +1,6 @@
 package com.laporeon.expensetracker.entity;
 
+import com.laporeon.expensetracker.enums.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.math.BigDecimal;
@@ -32,8 +34,8 @@ public class Expense {
     @Field(targetType = DECIMAL128)
     private BigDecimal amount;
 
-    @Field(name = "category_id")
-    private String categoryId;
+    @Field(targetType = FieldType.STRING)
+    private Category category;
 
     @Field(name = "expense_date")
     private LocalDate expenseDate;

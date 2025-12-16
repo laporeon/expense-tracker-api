@@ -3,10 +3,9 @@ package com.laporeon.expensetracker.service;
 import com.laporeon.expensetracker.dto.request.CreateExpenseDTO;
 import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
 import com.laporeon.expensetracker.dto.response.PageResponseDTO;
-import com.laporeon.expensetracker.entity.Category;
 import com.laporeon.expensetracker.entity.Expense;
+import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exception.ResourceNotFoundException;
-import com.laporeon.expensetracker.repository.CategoryRepository;
 import com.laporeon.expensetracker.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,17 +17,15 @@ import org.springframework.stereotype.Service;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
-    private final CategoryRepository categoryRepository;
 
     public ExpenseResponseDTO addExpense(CreateExpenseDTO dto) {
-        Category category = categoryRepository.findByName(dto.category().toLowerCase())
-                                              .orElseThrow(() -> new ResourceNotFoundException("Category not found. Check for available categories on: /categories"));
+        Category category = Category.fromString(dto.category());
 
         Expense expense = Expense.builder()
                                  .name(dto.name())
                                  .description(dto.description())
                                  .amount(dto.amount())
-                                 .categoryId(category.getId())
+                                 .category(category)
                                  .expenseDate(dto.expenseDate())
                                  .build();
 
@@ -39,7 +36,7 @@ public class ExpenseService {
                 expense.getName(),
                 expense.getDescription(),
                 expense.getAmount(),
-                category.getName(),
+                expense.getCategory(),
                 expense.getExpenseDate()
         );
     }
@@ -51,7 +48,7 @@ public class ExpenseService {
                                                                          expense.getName(),
                                                                          expense.getDescription(),
                                                                          expense.getAmount(),
-                                                                         categoryRepository.findById(expense.getCategoryId()).get().getName(),
+                                                                         expense.getCategory(),
                                                                          expense.getExpenseDate()));
 
         return new PageResponseDTO<>(

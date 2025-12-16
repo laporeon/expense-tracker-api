@@ -1,5 +1,7 @@
 package com.laporeon.expensetracker.dto.response;
 
+import com.laporeon.expensetracker.enums.Category;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -8,7 +10,7 @@ public record ExpenseResponseDTO(
         String name,
         String description,
         BigDecimal amount,
-        String category,
+        Category category,
         LocalDate expenseDate
 ) {
 }

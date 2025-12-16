@@ -21,7 +21,7 @@ public record CreateExpenseDTO(
         @Schema(example = "19.90")
         BigDecimal amount,
         @NotBlank(message = "Category name is required")
-        @Schema(example = "streaming")
+        @Schema(example = "subscriptions")
         String category,
         @NotNull(message = "Expense date is required (format: yyyy-MM-dd)")
         @JsonFormat(pattern = "yyyy-MM-dd")
