@@ -50,7 +50,7 @@ public class SwaggerConstants {
               "name": "Prime Video",
               "description": "Amazon Prime subscription",
               "amount": 19.90,
-              "category": "streaming",
+              "category": "subscriptions",
               "expenseDate": "2025-12-12"
             }
             """;
@@ -102,58 +102,11 @@ public class SwaggerConstants {
             }
             """;
 
-    // ===== CATEGORY EXAMPLES =====
-
-    public static final String CATEGORY_CREATED_RESPONSE = """
+    public static final String INVALID_EXPENSE_CATEGORY_ERROR = """
             {
-              "name": "health"
-            }
-            """;
-
-    public static final String CATEGORY_INVALID_BODY_ERROR = """
-            {
-              "status": 400,
-              "message": "Validation failed",
-              "details": {
-                "name": "Category name must be between 3-15 characters long"
-              },
+              "status": 422,
+              "message": "Invalid category: 'streaming'. Available categories: food, transportation, housing, utilities, healthcare, entertainment, education, clothing, insurance, savings, investments, groceries, pets, gifts, travel, subscriptions, technology, sports, others",
               "timestamp": "2025-12-10T18:10:42.133880691Z"
-            }
-            """;
-
-    public static final String CATEGORY_NOT_FOUND_ERROR = """
-            {
-              "status": 404,
-              "message": "Category not found. Check for available categories on: /categories",
-              "timestamp": "2025-12-10T18:10:42.133880691Z"
-            }
-            """;
-
-    public static final String CATEGORY_ALREADY_REGISTERED_ERROR = """
-            {
-              "status": 409,
-              "message": "Category already registered",
-              "timestamp": "2025-12-10T18:10:42.133880691Z"
-            }
-            """;
-
-    public static final String CATEGORIES_PAGE_RESPONSE = """
-            {
-              "content": [
-                    { "name": "health" },
-                    { "name": "food" },
-                    { "name": "others" }
-              ],
-              "pageNumber": 0,
-              "pageSize": 10,
-              "totalPages": 1,
-              "totalElements": 3,
-              "numberOfElements": 3,
-              "isFirstPage": true,
-              "isLastPage": true,
-              "isEmpty": false,
-              "isSorted": true,
-              "isUnsorted": false
             }
             """;
 
