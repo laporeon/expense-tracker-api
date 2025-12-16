@@ -34,8 +34,8 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "User information updated",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = UpdateUserResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.UPDATE_USER_SUCCESS_RESPONSE))),
-                    @ApiResponse(responseCode = "400", description = "Validation failed",
+                                    examples = @ExampleObject(value = SwaggerConstants.USER_UPDATE_SUCCESS))),
+                    @ApiResponse(responseCode = "400", description = "Request validation failed for one or more fields",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ValidationErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.USER_INVALID_BODY_ERROR))),
@@ -46,11 +46,11 @@ public class UserController {
                     @ApiResponse(responseCode = "409", description = "Conflict",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.ALREADY_REGISTERED_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.CONFLICT_ERROR))),
                     @ApiResponse(responseCode = "500", description = "Internal Server Error",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PutMapping("/{id}")
     public ResponseEntity<UpdateUserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
@@ -70,7 +70,7 @@ public class UserController {
                     @ApiResponse(responseCode = "500", description = "Internal Server Error",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PutMapping("/{id}/reactivate")
     public ResponseEntity<Void> reactivateUserProfile(@PathVariable("id") String id) {
@@ -90,7 +90,7 @@ public class UserController {
                     @ApiResponse(responseCode = "500", description = "Internal Server Error",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {

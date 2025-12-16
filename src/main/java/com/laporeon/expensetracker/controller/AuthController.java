@@ -37,19 +37,19 @@ public class AuthController {
                     @ApiResponse(responseCode = "201", description = "User registered",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = UpdateUserResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.REGISTER_USER_SUCCESS_RESPONSE))),
-                    @ApiResponse(responseCode = "400", description = "Validation failed",
+                                    examples = @ExampleObject(value = SwaggerConstants.USER_REGISTER_SUCCESS))),
+                    @ApiResponse(responseCode = "400", description = "Request validation failed for one or more fields",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ValidationErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.USER_INVALID_BODY_ERROR))),
                     @ApiResponse(responseCode = "409", description = "Conflict",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.ALREADY_REGISTERED_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.CONFLICT_ERROR))),
                     @ApiResponse(responseCode = "500", description = "Internal Server Error",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.GENERIC_ERROR_EXAMPLE))),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PostMapping("/sign-up")
     public ResponseEntity<AuthResponseDTO> registerUser(@Valid @RequestBody RegisterUserRequestDTO dto) {

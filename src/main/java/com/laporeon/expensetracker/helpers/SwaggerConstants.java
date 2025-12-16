@@ -4,7 +4,7 @@ public class SwaggerConstants {
 
     // ===== AUTH EXAMPLES =====
 
-    public static final String REGISTER_USER_SUCCESS_RESPONSE = """
+    public static final String USER_REGISTER_SUCCESS = """
             {
               "username": "username",
               "email": "user@gmail.com"
@@ -13,7 +13,7 @@ public class SwaggerConstants {
 
     // ===== USER EXAMPLES =====
 
-    public static final String UPDATE_USER_SUCCESS_RESPONSE = """
+    public static final String USER_UPDATE_SUCCESS = """
             {
               "username": "username",
               "email": "user@gmail.com",
@@ -44,7 +44,7 @@ public class SwaggerConstants {
 
     // ===== EXPENSE EXAMPLES =====
 
-    public static final String EXPENSE_CREATED_RESPONSE = """
+    public static final String EXPENSE_CREATE_SUCCESS = """
             {
               "id": "693c44c3080f9f897b29be50",
               "name": "Prime Video",
@@ -55,29 +55,18 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String EXPENSE_NOT_FOUND_ERROR = """
+    public static final String EXPENSE_UPDATE_SUCCESS = """
             {
-              "status": 404,
-              "message": "Expense with id '%693c44c3080f9f897b29be34' not found",
-              "timestamp": "2025-12-10T18:10:42.133880691Z"
+              "id": "693c44c3080f9f897b29be50",
+              "name": "Prime Video Updated",
+              "description": "Amazon Prime annual subscription",
+              "amount": 199.90,
+              "category": "subscriptions",
+              "expenseDate": "2025-12-15"
             }
             """;
 
-    public static final String EXPENSE_INVALID_BODY_ERROR = """
-            {
-              "status": 400,
-              "message": "Validation failed",
-              "details": {
-                "date": "Expense date is required (format: yyyy-MM-dd)",
-                "amount": "Amount must be greater than 0",
-                "name": "Name must be between 3-25 characters long",
-                "description": "Description must be between 10-50 characters long"
-              },
-              "timestamp": "2025-12-12T16:36:02.562839957Z"
-            }
-            """;
-
-    public static final String EXPENSES_PAGE_RESPONSE = """
+    public static final String EXPENSES_PAGE_SUCCESS = """
             {
               "content": [
                 {
@@ -102,7 +91,28 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String INVALID_EXPENSE_CATEGORY_ERROR = """
+    public static final String EXPENSE_NOT_FOUND_ERROR = """
+            {
+              "status": 404,
+              "message": "Expense with id '693c44c3080f9f897b29be34' not found",
+              "timestamp": "2025-12-10T18:10:42.133880691Z"
+            }
+            """;
+
+    public static final String EXPENSE_INVALID_BODY_ERROR = """
+            {
+              "status": 400,
+              "message": "Validation failed",
+              "details": {
+                "name": "Name must be between 3-25 characters long",
+                "description": "Description must be between 10-50 characters long",
+                "amount": "Amount must be greater than 0"
+              },
+              "timestamp": "2025-12-12T16:36:02.562839957Z"
+            }
+            """;
+
+    public static final String INVALID_CATEGORY_ERROR = """
             {
               "status": 422,
               "message": "Invalid category: 'streaming'. Available categories: food, transportation, housing, utilities, healthcare, entertainment, education, clothing, insurance, savings, investments, groceries, pets, gifts, travel, subscriptions, technology, sports, others",
@@ -112,7 +122,7 @@ public class SwaggerConstants {
 
     // ===== COMMON EXAMPLES =====
 
-    public static final String ALREADY_REGISTERED_ERROR_EXAMPLE = """
+    public static final String CONFLICT_ERROR = """
             {
               "status": 409,
               "message": "Email already registered",
@@ -120,7 +130,7 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String GENERIC_ERROR_EXAMPLE = """
+    public static final String SERVER_ERROR = """
             {
               "status": 500,
               "message": "An unexpected error occurred",
