@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -20,17 +22,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        Map<String, String> details = ex.getBindingResult()
-                                        .getFieldErrors()
-                                        .stream()
-                                        .collect(Collectors.toMap(
-                                                FieldError::getField,
-                                                FieldError::getDefaultMessage));
+        List<Map<String, String>> errors = ex.getBindingResult()
+                                             .getFieldErrors()
+                                             .stream()
+                                             .sorted(Comparator.comparing(FieldError::getField))
+                                             .map(err -> Map.of(
+                                                     "field", err.getField(),
+                                                     "message", err.getDefaultMessage()))
+                                             .collect(Collectors.toList());
+
 
         ValidationErrorResponseDTO error = new ValidationErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
-                "Validation failed",
-                details,
+                "Validation Error",
+                "Request validation failed for one or more fields",
+                errors,
                 Instant.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
