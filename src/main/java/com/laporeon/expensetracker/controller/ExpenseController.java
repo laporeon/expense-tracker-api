@@ -1,7 +1,7 @@
 package com.laporeon.expensetracker.controller;
 
-import com.laporeon.expensetracker.dto.request.CreateExpenseDTO;
-import com.laporeon.expensetracker.dto.request.UpdateExpenseDTO;
+import com.laporeon.expensetracker.dto.request.CreateExpenseRequestDTO;
+import com.laporeon.expensetracker.dto.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dto.response.ErrorResponseDTO;
 import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
 import com.laporeon.expensetracker.dto.response.PageResponseDTO;
@@ -56,7 +56,7 @@ public class ExpenseController {
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PostMapping()
-    public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseDTO dto) {
+    public ResponseEntity<ExpenseResponseDTO> createExpense(@Valid @RequestBody CreateExpenseRequestDTO dto) {
         ExpenseResponseDTO response = expenseService.addExpense(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -126,7 +126,7 @@ public class ExpenseController {
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PatchMapping("/{id}")
-    public ResponseEntity<ExpenseResponseDTO> updateExpense(@PathVariable("id") String id, @Valid @RequestBody UpdateExpenseDTO dto) {
+    public ResponseEntity<ExpenseResponseDTO> updateExpense(@PathVariable("id") String id, @Valid @RequestBody UpdateExpenseRequestDTO dto) {
         ExpenseResponseDTO response = expenseService.updateExpense(id, dto);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

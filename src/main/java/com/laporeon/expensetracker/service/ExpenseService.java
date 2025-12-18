@@ -1,7 +1,7 @@
 package com.laporeon.expensetracker.service;
 
-import com.laporeon.expensetracker.dto.request.CreateExpenseDTO;
-import com.laporeon.expensetracker.dto.request.UpdateExpenseDTO;
+import com.laporeon.expensetracker.dto.request.CreateExpenseRequestDTO;
+import com.laporeon.expensetracker.dto.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
 import com.laporeon.expensetracker.dto.response.PageResponseDTO;
 import com.laporeon.expensetracker.entity.Expense;
@@ -22,7 +22,7 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
 
-    public ExpenseResponseDTO addExpense(CreateExpenseDTO dto) {
+    public ExpenseResponseDTO addExpense(CreateExpenseRequestDTO dto) {
         Category category = Category.fromString(dto.category());
 
         Expense expense = Expense.builder()
@@ -71,7 +71,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public ExpenseResponseDTO updateExpense(String id, UpdateExpenseDTO dto) {
+    public ExpenseResponseDTO updateExpense(String id, UpdateExpenseRequestDTO dto) {
         Expense expense = expenseRepository.findById(id)
                                            .orElseThrow(() -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id)));
 
@@ -113,7 +113,7 @@ public class ExpenseService {
         );
     }
 
-    private void applyUpdates(Expense expense, UpdateExpenseDTO dto) {
+    private void applyUpdates(Expense expense, UpdateExpenseRequestDTO dto) {
         if (dto.name() != null) expense.setName(dto.name());
         if (dto.description() != null) expense.setDescription(dto.description());
         if (dto.amount() != null) expense.setAmount(dto.amount());
