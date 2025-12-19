@@ -27,7 +27,6 @@ public class UserService {
                         .username(dto.username())
                         .email(dto.email())
                         .password(passwordEncoder.encode(dto.password()))
-                        .isActive(true)
                         .build();
 
         userRepository.save(user);
