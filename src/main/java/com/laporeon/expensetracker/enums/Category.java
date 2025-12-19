@@ -1,7 +1,6 @@
 package com.laporeon.expensetracker.enums;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public enum Category {
     FOOD("food"),
@@ -24,23 +23,18 @@ public enum Category {
     SPORTS("sports"),
     OTHERS("others");
 
+    private static final String INVALID_CATEGORY_VALUE_ERROR = "Invalid category name '%s'";
     private final String categoryName;
 
     Category(String categoryName) {
         this.categoryName = categoryName;
     }
 
-    public static Category fromString(String text) {
+    public static Category fromString(String value) {
         return Arrays.stream(Category.values())
-                     .filter(c -> c.categoryName.equalsIgnoreCase(text))
+                     .filter(cat -> cat.categoryName.equalsIgnoreCase(value))
                      .findFirst()
-                     .orElseThrow(() -> {
-                         String availableCategories = Arrays.stream(Category.values())
-                                                            .map(c -> c.categoryName)
-                                                            .collect(Collectors.joining(", "));
-                         return new IllegalArgumentException(
-                                 String.format("Invalid category '%s'. Available categories: %s", text, availableCategories));
-                     });
+                     .orElseThrow(() -> new IllegalArgumentException(INVALID_CATEGORY_VALUE_ERROR.formatted(value)));
     }
 
 }
