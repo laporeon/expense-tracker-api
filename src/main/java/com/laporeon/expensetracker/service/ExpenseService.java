@@ -7,6 +7,7 @@ import com.laporeon.expensetracker.dto.response.PageResponseDTO;
 import com.laporeon.expensetracker.entity.Expense;
 import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exception.ResourceNotFoundException;
+import com.laporeon.expensetracker.mappers.ExpenseMapper;
 import com.laporeon.expensetracker.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,29 +21,15 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ExpenseService {
 
+    private final ExpenseMapper expenseMapper;
     private final ExpenseRepository expenseRepository;
 
     public ExpenseResponseDTO addExpense(CreateExpenseRequestDTO dto) {
-        Category category = Category.fromString(dto.category());
-
-        Expense expense = Expense.builder()
-                                 .name(dto.name())
-                                 .description(dto.description())
-                                 .amount(dto.amount())
-                                 .category(category)
-                                 .expenseDate(dto.expenseDate())
-                                 .build();
+        Expense expense = expenseMapper.toEntity(dto);
 
         expenseRepository.save(expense);
 
-        return new ExpenseResponseDTO(
-                expense.getId(),
-                expense.getName(),
-                expense.getDescription(),
-                expense.getAmount(),
-                expense.getCategory(),
-                expense.getExpenseDate()
-        );
+        return expenseMapper.toDTO(expense);
     }
 
     public PageResponseDTO<ExpenseResponseDTO> listAllExpenses(Pageable pageable, LocalDate startDate, LocalDate endDate) {
@@ -58,7 +45,16 @@ public class ExpenseService {
             expensesPage = expenseRepository.findAll(pageable);
         }
 
-        return buildPageResponse(expensesPage);
+        return expenseMapper.toPageResponseDTO(expensesPage);
+    }
+
+    public ExpenseResponseDTO findExpense(String id) {
+        Expense expense = expenseRepository.findById(id)
+                                           .orElseThrow(
+                                                   () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
+                                           );
+
+        return expenseMapper.toDTO(expense);
     }
 
     public void deleteExpense(String id) {
@@ -78,39 +74,7 @@ public class ExpenseService {
         applyUpdates(expense, dto);
         expenseRepository.save(expense);
 
-        return new ExpenseResponseDTO(
-                expense.getId(),
-                expense.getName(),
-                expense.getDescription(),
-                expense.getAmount(),
-                expense.getCategory(),
-                expense.getExpenseDate()
-        );
-    }
-
-    private PageResponseDTO<ExpenseResponseDTO> buildPageResponse(Page<Expense> page) {
-        Page<ExpenseResponseDTO> expenses = page.map(
-                e -> new ExpenseResponseDTO(
-                        e.getId(),
-                        e.getName(),
-                        e.getDescription(),
-                        e.getAmount(),
-                        e.getCategory(),
-                        e.getExpenseDate()));
-
-        return new PageResponseDTO<>(
-                expenses.getContent(),
-                expenses.getNumber(),
-                expenses.getSize(),
-                expenses.getTotalPages(),
-                expenses.getTotalElements(),
-                expenses.getNumberOfElements(),
-                expenses.isFirst(),
-                expenses.isLast(),
-                expenses.isEmpty(),
-                expenses.getSort().isSorted(),
-                expenses.getSort().isUnsorted()
-        );
+        return expenseMapper.toDTO(expense);
     }
 
     private void applyUpdates(Expense expense, UpdateExpenseRequestDTO dto) {
