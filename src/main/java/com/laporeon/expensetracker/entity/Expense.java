@@ -6,9 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.math.BigDecimal;
@@ -34,7 +34,6 @@ public class Expense {
     @Field(targetType = DECIMAL128)
     private BigDecimal amount;
 
-    @Field(targetType = FieldType.STRING)
     private Category category;
 
     @Field(name = "expense_date")
@@ -43,4 +42,8 @@ public class Expense {
     @CreatedDate
     @Field(name = "created_at")
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Field(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

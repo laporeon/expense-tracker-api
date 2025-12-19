@@ -61,7 +61,9 @@ public class SwaggerConstants {
               "description": "Amazon Prime subscription",
               "amount": 19.90,
               "category": "subscriptions",
-              "expenseDate": "2025-12-12"
+              "expenseDate": "2025-12-12",
+              "createdAt": "2025-12-19T13:30:51.912716229",
+              "updatedAt": "2025-12-19T13:30:51.912716229"
             }
             """;
 
@@ -131,7 +133,7 @@ public class SwaggerConstants {
     public static final String INVALID_CATEGORY_ERROR = """
             {
               "status": 422,
-              "message": "Invalid category: 'streaming'. Available categories: food, transportation, housing, utilities, healthcare, entertainment, education, clothing, insurance, savings, investments, groceries, pets, gifts, travel, subscriptions, technology, sports, others",
+              "message": "Invalid category name 'test'",
               "timestamp": "2025-12-10T18:10:42.133880691Z"
             }
             """;
