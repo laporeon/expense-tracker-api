@@ -67,7 +67,7 @@ public class ExpenseController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Expenses page successfully retrieved",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ExpenseResponseDTO.class),
+                                    schema = @Schema(implementation = PageResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.EXPENSES_PAGE_SUCCESS))),
                     @ApiResponse(responseCode = "500", description = "Internal Server Error",
                             content = @Content(mediaType = "application/json",
@@ -98,6 +98,29 @@ public class ExpenseController {
 
         PageResponseDTO<ExpenseResponseDTO> expenses = expenseService.listAllExpenses(pageable, startDate, endDate);
         return ResponseEntity.status(HttpStatus.OK).body(expenses);
+    }
+
+    @Operation(
+            summary = "Retrieve expense",
+            description = "Retrieves expense by its unique ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Expense successfully retrieved",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ExpenseResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSE_CREATE_SUCCESS))),
+                    @ApiResponse(responseCode = "404", description = "Expense not found",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.EXPENSE_NOT_FOUND_ERROR))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
+            })
+    @GetMapping("/{id}")
+    public ResponseEntity<ExpenseResponseDTO> findExpense(@PathVariable("id") String id) {
+        ExpenseResponseDTO response = expenseService.findExpense(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(
