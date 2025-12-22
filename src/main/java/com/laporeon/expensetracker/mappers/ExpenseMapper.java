@@ -1,9 +1,9 @@
 package com.laporeon.expensetracker.mappers;
 
-import com.laporeon.expensetracker.dto.request.CreateExpenseRequestDTO;
-import com.laporeon.expensetracker.dto.response.ExpenseResponseDTO;
-import com.laporeon.expensetracker.dto.response.PageResponseDTO;
-import com.laporeon.expensetracker.entity.Expense;
+import com.laporeon.expensetracker.dtos.request.CreateExpenseRequestDTO;
+import com.laporeon.expensetracker.dtos.response.ExpenseResponseDTO;
+import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
+import com.laporeon.expensetracker.entities.Expense;
 import com.laporeon.expensetracker.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;

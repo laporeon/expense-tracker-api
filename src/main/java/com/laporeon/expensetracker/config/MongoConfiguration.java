@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "com.laporeon.expensetracker.repository")
+@EnableMongoRepositories(basePackages = "com.laporeon.expensetracker.repositories")
 @EnableMongoAuditing
 public class MongoConfiguration {
 }
