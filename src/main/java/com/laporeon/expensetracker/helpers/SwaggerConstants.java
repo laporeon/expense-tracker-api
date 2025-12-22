@@ -40,8 +40,8 @@ public class SwaggerConstants {
                   "message": "Invalid email"
                 },
                 {
-                  "field": "username",
-                  "message": "Username must be between 6 and 25 characters"
+                  "field": "Name",
+                  "message": "Name must be between 3 and 255 characters"
                 },
                 {
                   "field": "password",
@@ -61,7 +61,7 @@ public class SwaggerConstants {
               "description": "Amazon Prime subscription",
               "amount": 19.90,
               "category": "subscriptions",
-              "expenseDate": "2025-12-12",
+              "date": "2025-12-12",
               "createdAt": "2025-12-19T13:30:51.912716229",
               "updatedAt": "2025-12-19T13:30:51.912716229"
             }
@@ -74,7 +74,7 @@ public class SwaggerConstants {
               "description": "Amazon Prime annual subscription",
               "amount": 199.90,
               "category": "subscriptions",
-              "expenseDate": "2025-12-15"
+              "date": "2025-12-15"
             }
             """;
 
@@ -87,7 +87,7 @@ public class SwaggerConstants {
                   "description": "Amazon Prime subscription",
                   "amount": 19.90,
                   "category": "entertainment",
-                  "expenseDate": "2025-12-12"
+                  "date": "2025-12-12"
                 }
               ],
               "pageNumber": 0,

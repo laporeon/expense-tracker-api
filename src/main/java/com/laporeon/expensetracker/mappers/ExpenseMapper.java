@@ -17,7 +17,7 @@ public class ExpenseMapper {
                       .description(dto.description())
                       .amount(dto.amount())
                       .category(Category.fromString(dto.category().toUpperCase()))
-                      .expenseDate(dto.expenseDate())
+                      .date(dto.date())
                       .build();
     }
 
@@ -28,7 +28,7 @@ public class ExpenseMapper {
                 expense.getDescription(),
                 expense.getAmount(),
                 expense.getCategory(),
-                expense.getExpenseDate(),
+                expense.getDate(),
                 expense.getCreatedAt(),
                 expense.getUpdatedAt()
         );

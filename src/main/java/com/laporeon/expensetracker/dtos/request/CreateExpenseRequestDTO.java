@@ -26,6 +26,6 @@ public record CreateExpenseRequestDTO(
         @NotNull(message = "Expense date is required (format: yyyy-MM-dd)")
         @JsonFormat(pattern = "yyyy-MM-dd")
         @Schema(example = "2025-12-12")
-        LocalDate expenseDate
+        LocalDate date
 ) {
 }

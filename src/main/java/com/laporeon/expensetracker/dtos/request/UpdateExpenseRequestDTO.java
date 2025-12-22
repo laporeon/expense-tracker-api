@@ -18,10 +18,12 @@ public record UpdateExpenseRequestDTO(
         String description,
         @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
         @Digits(integer = 10, fraction = 2, message = "Amount must have at most 10 integer digits and 2 decimal places")
-        @Schema(example = "19.90") BigDecimal amount,
+        @Schema(example = "19.90")
+        BigDecimal amount,
         @Schema(example = "subscriptions")
         String category,
         @JsonFormat(pattern = "yyyy-MM-dd")
-        @Schema(example = "2025-12-12") LocalDate expenseDate
+        @Schema(example = "2025-12-12")
+        LocalDate date
 ) {
 }

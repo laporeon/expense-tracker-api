@@ -70,7 +70,7 @@ public class ExpenseServiceTest {
                                      .description(VALID_DESCRIPTION)
                                      .amount(VALID_AMOUNT)
                                      .category(VALID_CATEGORY)
-                                     .expenseDate(VALID_EXPENSE_DATE)
+                                     .date(VALID_EXPENSE_DATE)
                                      .createdAt(createdAt)
                                      .updatedAt(updatedAt)
                                      .build();
@@ -81,7 +81,7 @@ public class ExpenseServiceTest {
                 mockedExpenseEntity.getDescription(),
                 mockedExpenseEntity.getAmount(),
                 mockedExpenseEntity.getCategory(),
-                mockedExpenseEntity.getExpenseDate(),
+                mockedExpenseEntity.getDate(),
                 mockedExpenseEntity.getCreatedAt(),
                 mockedExpenseEntity.getUpdatedAt()
         );

@@ -82,7 +82,7 @@ public class ExpenseService {
         if (dto.description() != null) expense.setDescription(dto.description());
         if (dto.amount() != null) expense.setAmount(dto.amount());
         if (dto.category() != null) expense.setCategory(Category.fromString(dto.category()));
-        if (dto.expenseDate() != null) expense.setExpenseDate(dto.expenseDate());
+        if (dto.date() != null) expense.setDate(dto.date());
     }
 
 }

@@ -36,8 +36,8 @@ public class Expense {
 
     private Category category;
 
-    @Field(name = "expense_date")
-    private LocalDate expenseDate;
+    @Field(name = "date")
+    private LocalDate date;
 
     @CreatedDate
     @Field(name = "created_at")
