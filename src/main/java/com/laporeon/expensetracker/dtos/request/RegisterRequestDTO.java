@@ -6,13 +6,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequestDTO(
-        @NotBlank(message = "Username is required")
+        @NotBlank(message = "Name is required")
+        @Size(min = 3, max = 255, message = "Name must be between {min} and {max} characters")
+        @Schema(example = "John Doe")
+        String name,
         @Size(min = 6, max = 25, message = "Username must be between {min} and {max} characters")
-        @Schema(example = "username")
+        @Schema(description = "Optional username for user registration. If not provided, it can be set later via user update endpoint.", example = "johndoe")
         String username,
         @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email")
         @NotBlank(message = "Email is required")
-        @Schema(example = "user@gmail.com")
+        @Schema(example = "johndoe@gmail.com")
         String email,
         @NotBlank(message = "Password is required")
         @Pattern(

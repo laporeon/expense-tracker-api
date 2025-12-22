@@ -24,6 +24,8 @@ public class User {
     @MongoId
     private String id;
 
+    private String name;
+
     @Indexed(unique = true, name = "idx_username")
     private String username;
 
