@@ -1,7 +1,13 @@
 package com.laporeon.expensetracker.dtos.response;
 
-public record AuthResponseDTO(
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record RegisterResponseDTO(
+        String id,
+        String name,
         String username,
-        String email
+        String email,
+        String token
 ) {
 }

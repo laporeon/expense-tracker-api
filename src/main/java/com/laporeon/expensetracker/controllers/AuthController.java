@@ -1,12 +1,10 @@
 package com.laporeon.expensetracker.controllers;
 
+import com.laporeon.expensetracker.dtos.request.LoginRequestDTO;
 import com.laporeon.expensetracker.dtos.request.RegisterRequestDTO;
-import com.laporeon.expensetracker.dtos.response.AuthResponseDTO;
-import com.laporeon.expensetracker.dtos.response.ErrorResponseDTO;
-import com.laporeon.expensetracker.dtos.response.UpdateUserResponseDTO;
-import com.laporeon.expensetracker.dtos.response.ValidationErrorResponseDTO;
+import com.laporeon.expensetracker.dtos.response.*;
 import com.laporeon.expensetracker.helpers.SwaggerConstants;
-import com.laporeon.expensetracker.services.UserService;
+import com.laporeon.expensetracker.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -24,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @Operation(
             summary = "Register a new user",
@@ -37,7 +35,7 @@ public class AuthController {
                     @ApiResponse(responseCode = "201", description = "User registered",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = UpdateUserResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.USER_REGISTER_SUCCESS))),
+                                    examples = @ExampleObject(value = SwaggerConstants.REGISTER_SUCCESS))),
                     @ApiResponse(responseCode = "400", description = "Request validation failed for one or more fields",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ValidationErrorResponseDTO.class),
@@ -51,9 +49,29 @@ public class AuthController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
-    @PostMapping("/sign-up")
-    public ResponseEntity<AuthResponseDTO> registerUser(@Valid @RequestBody RegisterRequestDTO dto) {
-        AuthResponseDTO response = userService.register(dto);
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponseDTO> register(@Valid @RequestBody RegisterRequestDTO dto) {
+        RegisterResponseDTO response = authService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(
+            summary = "Authenticate user and return JWT token",
+            description = "Validates credentials and returns access token with user details",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login successful",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = LoginResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.LOGIN_SUCCESS))),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
+            })
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
+        LoginResponseDTO response = authService.login(dto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
