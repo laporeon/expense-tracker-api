@@ -4,10 +4,18 @@ public class SwaggerConstants {
 
     // ===== AUTH EXAMPLES =====
 
-    public static final String USER_REGISTER_SUCCESS = """
+    public static final String REGISTER_SUCCESS = """
             {
-              "username": "username",
-              "email": "user@gmail.com"
+              "id": "6949a13ea23ea0e5b43d6068",
+              "name": "John Doe",
+              "email": "johndoe@gmail.com",
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJleHBlbnNlLXRyYWNrZXItYXBpLWF1dGgiLCJzdWIiOiI2OTQ5YTEzZWEyM2VhMGU1YjQzZDYwNjgiLCJpYXQiOjE3NjY0MzMwODYsImV4cCI6MTc2NjQ0MDI4Nn0.wzEwLBKtzdNwWGxcr6crkhNq6aEWjsbvAqQBTr4aYgM"
+            }
+            """;
+
+    public static final String LOGIN_SUCCESS = """
+            {
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJleHBlbnNlLXRyYWNrZXItYXBpLWF1dGgiLCJzdWIiOiI2OTQ5YTEzZWEyM2VhMGU1YjQzZDYwNjgiLCJpYXQiOjE3NjY0MzMwODYsImV4cCI6MTc2NjQ0MDI4Nn0.wzEwLBKtzdNwWGxcr6crkhNq6aEWjsbvAqQBTr4aYgM"
             }
             """;
 
@@ -15,8 +23,8 @@ public class SwaggerConstants {
 
     public static final String USER_UPDATE_SUCCESS = """
             {
-              "username": "username",
-              "email": "user@gmail.com",
+              "username": "johndoe",
+              "email": "johndoe@gmail.com",
               "updatedAt": "2025-12-10T18:08:28.824174472"
             }
             """;
@@ -24,7 +32,7 @@ public class SwaggerConstants {
     public static final String USER_NOT_FOUND_ERROR = """
             {
               "status": 404,
-              "message": "User not found",
+              "message": "User not found or inactive",
               "timestamp": "2025-12-11T18:02:20.152685443Z"
             }
             """;
