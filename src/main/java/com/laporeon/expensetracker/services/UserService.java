@@ -64,7 +64,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String id) {
         userRepository.findById(id)
-                      .filter(u -> u.isActive())
+                      .filter(User::isActive)
                       .ifPresentOrElse(
                               user -> { user.setActive(false); userRepository.save(user); },
                               () -> { throw new ResourceNotFoundException("User not found"); }
