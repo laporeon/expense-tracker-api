@@ -1,12 +1,10 @@
 package com.laporeon.expensetracker.services;
 
-import com.laporeon.expensetracker.dtos.request.RegisterRequestDTO;
 import com.laporeon.expensetracker.dtos.request.UpdateUserRequestDTO;
-import com.laporeon.expensetracker.dtos.response.AuthResponseDTO;
 import com.laporeon.expensetracker.dtos.response.UpdateUserResponseDTO;
 import com.laporeon.expensetracker.entities.User;
-import com.laporeon.expensetracker.exceptions.AlreadyRegisteredException;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
+import com.laporeon.expensetracker.helpers.CustomValidator;
 import com.laporeon.expensetracker.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,23 +17,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-
-    public AuthResponseDTO register(RegisterRequestDTO dto) {
-        ensureUniqueFields(dto.username(), dto.email());
-
-        User user = User.builder()
-                        .username(dto.username())
-                        .email(dto.email())
-                        .password(passwordEncoder.encode(dto.password()))
-                        .build();
-
-        userRepository.save(user);
-
-        return new AuthResponseDTO(
-                user.getUsername(),
-                user.getEmail()
-        );
-    }
+    private final CustomValidator customValidator;
 
     @Transactional
     public UpdateUserResponseDTO update(String id, UpdateUserRequestDTO dto) {
@@ -44,7 +26,7 @@ public class UserService {
                                   .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         
         if (dto.email() != null && !dto.email().isBlank()) {
-            ensureUniqueFields(user.getEmail(), dto.email());
+            customValidator.ensureUniqueFields(user.getEmail(), dto.email());
             user.setEmail(dto.email());
         }
 
@@ -67,7 +49,7 @@ public class UserService {
                       .filter(User::isActive)
                       .ifPresentOrElse(
                               user -> { user.setActive(false); userRepository.save(user); },
-                              () -> { throw new ResourceNotFoundException("User not found"); }
+                              () -> { throw new ResourceNotFoundException("User not found or inactive"); }
                       );
     }
 
@@ -80,16 +62,6 @@ public class UserService {
                               user -> { user.setActive(true); userRepository.save(user); },
                               () -> { throw new ResourceNotFoundException("User not found"); }
                       );
-    }
-
-    private void ensureUniqueFields(String username, String email) {
-        if (username != null && !username.isEmpty() && userRepository.existsByUsername(username)) {
-            throw new AlreadyRegisteredException("Username already taken");
-        }
-
-        if (email != null && !email.isEmpty() && userRepository.existsByEmail(email)) {
-            throw new AlreadyRegisteredException("Email already registered");
-        }
     }
 
 }
