@@ -36,6 +36,8 @@ public class Expense {
 
     private Category category;
 
+    private String userId;
+
     @Field(name = "date")
     private LocalDate date;
 

@@ -7,6 +7,7 @@ import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
 import com.laporeon.expensetracker.entities.Expense;
 import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
+import com.laporeon.expensetracker.helpers.SecurityUtils;
 import com.laporeon.expensetracker.mappers.ExpenseMapper;
 import com.laporeon.expensetracker.repositories.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
 
     public ExpenseResponseDTO addExpense(CreateExpenseRequestDTO dto) {
-        Expense expense = expenseMapper.toEntity(dto);
+        Expense expense = expenseMapper.toEntity(dto, SecurityUtils.getCurrentUserId());
 
         expenseRepository.save(expense);
 
@@ -36,20 +37,20 @@ public class ExpenseService {
         Page<Expense> expensesPage;
 
         if (startDate != null && endDate != null) {
-            expensesPage = expenseRepository.findByExpenseDateBetween(startDate, endDate, pageable);
+            expensesPage = expenseRepository.findByUserIdAndDateBetween(SecurityUtils.getCurrentUserId(), startDate, endDate, pageable);
         } else if (startDate != null) {
-            expensesPage = expenseRepository.findByExpenseDateGreaterThanEqual(startDate, pageable);
+            expensesPage = expenseRepository.findByUserIdAndDateGreaterThanEqual(SecurityUtils.getCurrentUserId(), startDate, pageable);
         } else if (endDate != null) {
-            expensesPage = expenseRepository.findByExpenseDateLessThanEqual(endDate, pageable);
+            expensesPage = expenseRepository.findByUserIdAndDateLessThanEqual(SecurityUtils.getCurrentUserId(), endDate, pageable);
         } else {
-            expensesPage = expenseRepository.findAll(pageable);
+            expensesPage = expenseRepository.findAllByUserId(SecurityUtils.getCurrentUserId(), pageable);
         }
 
         return expenseMapper.toPageResponseDTO(expensesPage);
     }
 
     public ExpenseResponseDTO findExpense(String id) {
-        Expense expense = expenseRepository.findById(id)
+        Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(
                                                    () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
                                            );
@@ -58,7 +59,7 @@ public class ExpenseService {
     }
 
     public void deleteExpense(String id) {
-        expenseRepository.findById(id)
+        expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                       .ifPresentOrElse(
                               expenseRepository::delete,
                               () -> {
@@ -68,7 +69,7 @@ public class ExpenseService {
 
     @Transactional
     public ExpenseResponseDTO updateExpense(String id, UpdateExpenseRequestDTO dto) {
-        Expense expense = expenseRepository.findById(id)
+        Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(() -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id)));
 
         applyUpdates(expense, dto);

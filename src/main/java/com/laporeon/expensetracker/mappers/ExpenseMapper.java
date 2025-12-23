@@ -11,12 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExpenseMapper {
 
-    public Expense toEntity(CreateExpenseRequestDTO dto) {
+    public Expense toEntity(CreateExpenseRequestDTO dto, String userId) {
         return Expense.builder()
                       .name(dto.name())
                       .description(dto.description())
                       .amount(dto.amount())
                       .category(Category.fromString(dto.category().toUpperCase()))
+                      .userId(userId)
                       .date(dto.date())
                       .build();
     }

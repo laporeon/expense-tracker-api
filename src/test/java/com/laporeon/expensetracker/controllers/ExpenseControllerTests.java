@@ -1,7 +1,7 @@
 package com.laporeon.expensetracker.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.laporeon.expensetracker.config.SecurityConfiguration;
+import com.laporeon.expensetracker.config.SecurityFilter;
 import com.laporeon.expensetracker.dtos.request.CreateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.response.ExpenseResponseDTO;
@@ -14,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -33,8 +33,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(ExpenseController.class)
-@Import(SecurityConfiguration.class)
 @DisplayName("ExpenseController Tests")
 class ExpenseControllerTests {
 
@@ -58,6 +58,9 @@ class ExpenseControllerTests {
 
     @MockitoBean
     private ExpenseService expenseService;
+
+    @MockitoBean
+    private SecurityFilter securityFilter;
 
     private ExpenseResponseDTO mockedExpenseResponse;
     private String validExpenseId;
@@ -123,7 +126,7 @@ class ExpenseControllerTests {
                .andExpect(jsonPath("$.errors[0].message").value("Amount is required"))
                .andExpect(jsonPath("$.errors[1].field").value("category"))
                .andExpect(jsonPath("$.errors[1].message").value("Category name is required"))
-               .andExpect(jsonPath("$.errors[2].field").value("expenseDate"))
+               .andExpect(jsonPath("$.errors[2].field").value("date"))
                .andExpect(jsonPath("$.errors[2].message").value("Expense date is required (format: yyyy-MM-dd)"))
                .andExpect(jsonPath("$.errors[3].field").value("name"))
                .andExpect(jsonPath("$.errors[3].message").value("Name is required"));

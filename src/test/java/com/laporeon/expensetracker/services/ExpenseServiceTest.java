@@ -7,15 +7,18 @@ import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
 import com.laporeon.expensetracker.entities.Expense;
 import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
+import com.laporeon.expensetracker.helpers.SecurityUtils;
 import com.laporeon.expensetracker.mappers.ExpenseMapper;
 import com.laporeon.expensetracker.repositories.ExpenseRepository;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -58,11 +61,14 @@ public class ExpenseServiceTest {
     private ExpenseResponseDTO mockedExpenseResponse;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String userId;
+    private MockedStatic<SecurityUtils> mockedSecurity;
 
     @BeforeEach
     void setUp() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        userId = new ObjectId().toString();
 
         mockedExpenseEntity = Expense.builder()
                                      .id(new ObjectId().toString())
@@ -71,6 +77,7 @@ public class ExpenseServiceTest {
                                      .amount(VALID_AMOUNT)
                                      .category(VALID_CATEGORY)
                                      .date(VALID_EXPENSE_DATE)
+                                     .userId(userId)
                                      .createdAt(createdAt)
                                      .updatedAt(updatedAt)
                                      .build();
@@ -85,6 +92,14 @@ public class ExpenseServiceTest {
                 mockedExpenseEntity.getCreatedAt(),
                 mockedExpenseEntity.getUpdatedAt()
         );
+
+        mockedSecurity = mockStatic(SecurityUtils.class);
+        mockedSecurity.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockedSecurity.close();
     }
 
     @Test
@@ -97,7 +112,8 @@ public class ExpenseServiceTest {
                 VALID_CATEGORY.toString(),
                 VALID_EXPENSE_DATE);
 
-        when(expenseMapper.toEntity(any(CreateExpenseRequestDTO.class))).thenReturn(mockedExpenseEntity);
+        when(expenseMapper.toEntity(any(CreateExpenseRequestDTO.class), any(
+                String.class))).thenReturn(mockedExpenseEntity);
         when(expenseRepository.save(any(Expense.class))).thenReturn(mockedExpenseEntity);
         when(expenseMapper.toDTO(any(Expense.class))).thenReturn(mockedExpenseResponse);
 
@@ -130,14 +146,14 @@ public class ExpenseServiceTest {
                 false
         );
 
-        when(expenseRepository.findAll(pageable)).thenReturn(expectedPage);
+        when(expenseRepository.findAllByUserId(userId, pageable)).thenReturn(expectedPage);
         when(expenseMapper.toPageResponseDTO(expectedPage)).thenReturn(expectedResponse);
 
         PageResponseDTO<ExpenseResponseDTO> result = expenseService.listAllExpenses(pageable, null, null);
 
         assertThat(result.totalElements()).isEqualTo(1);
         assertThat(result.content()).hasSize(1);
-        verify(expenseRepository, times(1)).findAll(pageable);
+        verify(expenseRepository, times(1)).findAllByUserId(userId, pageable);
     }
 
     @Test
@@ -160,7 +176,7 @@ public class ExpenseServiceTest {
                 false
         );
 
-        when(expenseRepository.findAll(pageable)).thenReturn(emptyPage);
+        when(expenseRepository.findAllByUserId(userId, pageable)).thenReturn(emptyPage);
         when(expenseMapper.toPageResponseDTO(any(Page.class))).thenReturn(emptyPageResponse);
 
         PageResponseDTO<ExpenseResponseDTO> result = expenseService.listAllExpenses(pageable, null, null);
@@ -169,13 +185,13 @@ public class ExpenseServiceTest {
         assertThat(result.totalElements()).isZero();
         assertThat(result.isEmpty()).isTrue();
 
-        verify(expenseRepository, times(1)).findAll(pageable);
+        verify(expenseRepository, times(1)).findAllByUserId(userId, pageable);
     }
 
     @Test
     @DisplayName("Should return expense when given existing id")
     void shouldReturnExpenseWhenGivenExistingId() {
-        when(expenseRepository.findById(mockedExpenseEntity.getId())).thenReturn(Optional.of(mockedExpenseEntity));
+        when(expenseRepository.findByIdAndUserId(mockedExpenseEntity.getId(), userId)).thenReturn(Optional.of(mockedExpenseEntity));
         when(expenseMapper.toDTO(any(Expense.class))).thenReturn(mockedExpenseResponse);
 
         ExpenseResponseDTO sut = expenseService.findExpense(mockedExpenseEntity.getId());
@@ -183,7 +199,7 @@ public class ExpenseServiceTest {
         assertThat(sut.id()).isEqualTo(mockedExpenseResponse.id());
         assertThat(sut.name()).isEqualTo(mockedExpenseResponse.name());
 
-        verify(expenseRepository, times(1)).findById(mockedExpenseEntity.getId());
+        verify(expenseRepository, times(1)).findByIdAndUserId(mockedExpenseEntity.getId(), userId);
     }
 
     @Test
@@ -191,11 +207,11 @@ public class ExpenseServiceTest {
     void shouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
         String invalidId = "68e0234a70424186e056e45f";
 
-        when(expenseRepository.findById(invalidId)).thenReturn(Optional.empty());
+        when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> expenseService.findExpense(invalidId));
 
-        verify(expenseRepository, times(1)).findById(invalidId);
+        verify(expenseRepository, times(1)).findByIdAndUserId(invalidId, userId);
     }
 
     @Test
@@ -203,7 +219,7 @@ public class ExpenseServiceTest {
     void shouldUpdateExpenseWhenGivenExistingIdAndValidRequestData() {
         UpdateExpenseRequestDTO requestDTO = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
 
-        when(expenseRepository.findById(mockedExpenseEntity.getId())).thenReturn(Optional.of(mockedExpenseEntity));
+        when(expenseRepository.findByIdAndUserId(mockedExpenseEntity.getId(), userId)).thenReturn(Optional.of(mockedExpenseEntity));
         when(expenseMapper.toDTO(any(Expense.class))).thenReturn(mockedExpenseResponse);
         when(expenseRepository.save(any(Expense.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -216,7 +232,7 @@ public class ExpenseServiceTest {
         assertThat(response.createdAt()).isEqualTo(mockedExpenseResponse.createdAt());
         assertThat(response.updatedAt()).isNotNull();
 
-        verify(expenseRepository, times(1)).findById(mockedExpenseEntity.getId());
+        verify(expenseRepository, times(1)).findByIdAndUserId(mockedExpenseEntity.getId(), userId);
         verify(expenseRepository, times(1)).save(any(Expense.class));
     }
 
@@ -226,23 +242,23 @@ public class ExpenseServiceTest {
         String invalidId = "68e0234a70424186e056e45f";
         UpdateExpenseRequestDTO requestDTO = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
 
-        when(expenseRepository.findById(invalidId)).thenReturn(Optional.empty());
+        when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> expenseService.updateExpense(invalidId, requestDTO));
 
-        verify(expenseRepository, times(1)).findById(invalidId);
+        verify(expenseRepository, times(1)).findByIdAndUserId(invalidId, userId);
     }
 
     @Test
     @DisplayName("Should delete expense when given existing id")
     void shouldDeleteExpenseWhenGivenExistingId() {
-        when(expenseRepository.findById(mockedExpenseEntity.getId())).thenReturn(Optional.of(mockedExpenseEntity));
+        when(expenseRepository.findByIdAndUserId(mockedExpenseEntity.getId(), userId)).thenReturn(Optional.of(mockedExpenseEntity));
 
         doNothing().when(expenseRepository).delete(mockedExpenseEntity);
 
         expenseService.deleteExpense(mockedExpenseEntity.getId());
 
-        verify(expenseRepository, times(1)).findById(mockedExpenseEntity.getId());
+        verify(expenseRepository, times(1)).findByIdAndUserId(mockedExpenseEntity.getId(), userId);
         verify(expenseRepository, times(1)).delete(mockedExpenseEntity);
     }
 
@@ -251,11 +267,11 @@ public class ExpenseServiceTest {
     void shouldThrowResourceNotFoundExceptionWhenDeletingExpenseWithNonExistingId() {
         String invalidId = "68e0234a70424186e056e45f";
 
-        when(expenseRepository.findById(invalidId)).thenReturn(Optional.empty());
+        when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> expenseService.deleteExpense(invalidId));
 
-        verify(expenseRepository, times(1)).findById(invalidId);
+        verify(expenseRepository, times(1)).findByIdAndUserId(invalidId, userId);
         verify(expenseRepository, never()).delete(any(Expense.class));
     }
 }
