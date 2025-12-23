@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,7 +29,7 @@ public class GlobalExceptionHandler {
                                              .map(err -> Map.of(
                                                      "field", err.getField(),
                                                      "message", err.getDefaultMessage()))
-                                             .collect(Collectors.toList());
+                                             .toList();
 
 
         ValidationErrorResponseDTO error = new ValidationErrorResponseDTO(
@@ -67,11 +66,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadCredentialsException(BadCredentialsException ex) {
-        log.error("An unexpected error occurred: {}", ex);
+        log.warn("Login attempt failed: {}", ex.getMessage());
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Invalid credentials",
+                "Invalid username or password",
                 Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
@@ -91,7 +90,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleException(Exception ex) {
-        log.error("An unexpected error occurred {}", ex.getMessage());
+        log.error("An unexpected error occurred: ", ex);
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
