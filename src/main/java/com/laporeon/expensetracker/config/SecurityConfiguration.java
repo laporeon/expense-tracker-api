@@ -26,9 +26,7 @@ public class SecurityConfiguration {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-docs/**",
-            "/swagger-resources/**",
-            "/swagger-resources/configuration/ui",
-            "/swagger-resources/configuration/security"
+            "/swagger-resources/**"
     };
     private static final String REGISTER_ENDPOINT = "/api/v1/auth/register";
     private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
