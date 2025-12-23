@@ -22,7 +22,7 @@ public class SwaggerConstants {
     public static final String LOGIN_ERROR = """
             {
               "status": 401,
-              "message": "Invalid credentials",
+              "message": "Invalid username or password",
               "timestamp": "2025-12-23T18:18:54.698703304Z"
             }
             """;
