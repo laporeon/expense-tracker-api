@@ -3,7 +3,6 @@ package com.laporeon.expensetracker.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,16 +20,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     private static final int BCRYPT_STRENGTH = 10;
-    private static final String[] SWAGGER_ENDPOINTS = {
+    private static final String[] PUBLIC_ENDPOINTS = {
+            // Auth
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            // Swagger
             "/docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
+            "/v3/api-docs/**",
             "/api-docs/**",
             "/swagger-resources/**"
     };
-    private static final String REGISTER_ENDPOINT = "/api/v1/auth/register";
-    private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
+
     private final SecurityFilter securityFilter;
+    private final SecurityExceptionHandler securityExceptionHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -38,11 +42,13 @@ public class SecurityConfiguration {
                 .csrf(CsrfConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                               .requestMatchers(HttpMethod.GET, SWAGGER_ENDPOINTS).permitAll()
-                                               .requestMatchers(HttpMethod.POST, REGISTER_ENDPOINT).permitAll()
-                                               .requestMatchers(HttpMethod.POST, LOGIN_ENDPOINT).permitAll()
+                                               .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                                                .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(securityExceptionHandler)
+                        .accessDeniedHandler(securityExceptionHandler)
+                )
                 .formLogin(FormLoginConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .build();
