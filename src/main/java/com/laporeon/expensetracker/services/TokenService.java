@@ -25,7 +25,7 @@ public class TokenService {
                   .withIssuer(ISSUER)
                   .withSubject(user.getId().toString())
                   .withIssuedAt(Instant.now())
-                  .withExpiresAt(genExpirationDate())
+                  .withExpiresAt(generateExpirationDate())
                   .sign(algorithm);
     }
 
@@ -40,7 +40,7 @@ public class TokenService {
 
     }
 
-    private Instant genExpirationDate() {
+    private Instant generateExpirationDate() {
         return Instant.now().plusSeconds(TOKEN_EXPIRATION_TIME_IN_SECONDS);
     }
 
