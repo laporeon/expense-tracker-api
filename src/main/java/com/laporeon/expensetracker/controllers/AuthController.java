@@ -30,7 +30,7 @@ public class AuthController {
 
     @Operation(
             summary = "Register a new user",
-            description = "Registers a new user, ensuring email and username are unique and the password meets security requirements.",
+            description = "Registers a new user, ensuring email is unique and the password meets security requirements.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "User registered",
                             content = @Content(mediaType = "application/json",
