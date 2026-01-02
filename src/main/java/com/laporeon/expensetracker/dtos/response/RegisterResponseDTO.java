@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record RegisterResponseDTO(
         String id,
         String name,
-        String username,
         String email,
         String token
 ) {
