@@ -59,12 +59,12 @@ public class ExpenseService {
     }
 
     public void deleteExpense(String id) {
-        expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
-                      .ifPresentOrElse(
-                              expenseRepository::delete,
-                              () -> {
-                                  throw new ResourceNotFoundException("Expense with id '%s' not found".formatted(id));
-                              });
+        Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
+                                           .orElseThrow(
+                                                   () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
+                                           );
+
+        expenseRepository.delete(expense);
     }
 
     @Transactional
