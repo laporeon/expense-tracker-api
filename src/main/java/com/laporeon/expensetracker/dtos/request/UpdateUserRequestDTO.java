@@ -2,8 +2,15 @@ package com.laporeon.expensetracker.dtos.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record UpdateUserRequestDTO(
+        @Size(min = 3, max = 255, message = "Name must be between {min} and {max} characters")
+        @Schema(
+                description = "Optional name",
+                example = "John James Doe"
+        )
+        String name,
         @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email")
         @Schema(
                 description = "Optional email. Must be a valid email address.",
