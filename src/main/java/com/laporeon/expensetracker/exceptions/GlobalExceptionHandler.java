@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDTO error = new ErrorResponseDTO(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Invalid username or password",
+                "Invalid email or password",
                 Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
