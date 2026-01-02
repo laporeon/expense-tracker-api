@@ -1,4 +1,4 @@
-package com.laporeon.expensetracker.config;
+package com.laporeon.expensetracker.config.security;
 
 import com.laporeon.expensetracker.helpers.JwtTokenProvider;
 import com.laporeon.expensetracker.repositories.UserRepository;
@@ -19,7 +19,7 @@ import java.io.IOException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SecurityFilter extends OncePerRequestFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;

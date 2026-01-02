@@ -1,4 +1,4 @@
-package com.laporeon.expensetracker.config;
+package com.laporeon.expensetracker.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.laporeon.expensetracker.dtos.response.ErrorResponseDTO;
