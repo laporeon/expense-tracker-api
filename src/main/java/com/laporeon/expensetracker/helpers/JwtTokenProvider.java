@@ -1,4 +1,4 @@
-package com.laporeon.expensetracker.services;
+package com.laporeon.expensetracker.helpers;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -11,7 +11,7 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
-public class TokenService {
+public class JwtTokenProvider {
 
     private static final int TOKEN_EXPIRATION_TIME_IN_SECONDS = 7200;
     private static final String ISSUER = "expense-tracker-api-auth";

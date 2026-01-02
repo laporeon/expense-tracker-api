@@ -1,7 +1,7 @@
 package com.laporeon.expensetracker.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.laporeon.expensetracker.config.SecurityFilter;
+import com.laporeon.expensetracker.config.security.JwtAuthenticationFilter;
 import com.laporeon.expensetracker.dtos.request.CreateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.response.ExpenseResponseDTO;
@@ -60,7 +60,7 @@ class ExpenseControllerTests {
     private ExpenseService expenseService;
 
     @MockitoBean
-    private SecurityFilter securityFilter;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private ExpenseResponseDTO mockedExpenseResponse;
     private String validExpenseId;
