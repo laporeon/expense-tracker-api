@@ -30,9 +30,6 @@ public class User implements UserDetails {
 
     private String name;
 
-    @Indexed(unique = true, sparse = true, name = "idx_username")
-    private String username;
-
     @Indexed(unique = true, name = "idx_email")
     private String email;
 
@@ -51,8 +48,13 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
 }
