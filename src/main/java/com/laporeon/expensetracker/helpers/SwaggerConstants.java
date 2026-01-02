@@ -22,7 +22,7 @@ public class SwaggerConstants {
     public static final String LOGIN_ERROR = """
             {
               "status": 401,
-              "message": "Invalid username or password",
+              "message": "Invalid email or password",
               "timestamp": "2025-12-23T18:18:54.698703304Z"
             }
             """;
@@ -31,7 +31,6 @@ public class SwaggerConstants {
 
     public static final String USER_UPDATE_SUCCESS = """
             {
-              "username": "johndoe",
               "email": "johndoe@gmail.com",
               "updatedAt": "2025-12-10T18:08:28.824174472"
             }
@@ -155,6 +154,14 @@ public class SwaggerConstants {
             """;
 
     // ===== COMMON EXAMPLES =====
+
+    public static final String UNAUTHORIZED_ERROR = """
+            {
+              "status": 403,
+              "message": "Access denied - insufficient permissions for this action",
+              "timestamp": "2025-12-10T18:08:56.353210281Z"
+            }
+            """;
 
     public static final String CONFLICT_ERROR = """
             {

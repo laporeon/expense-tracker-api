@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,6 +42,10 @@ public class UserController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ValidationErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.USER_INVALID_BODY_ERROR))),
+                    @ApiResponse(responseCode = "403", description = "Access dened",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.UNAUTHORIZED_ERROR))),
                     @ApiResponse(responseCode = "404", description = "User not found",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
@@ -54,6 +59,7 @@ public class UserController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
+    @PreAuthorize("#id == authentication.principal.id")
     @PutMapping("/{id}")
     public ResponseEntity<UpdateUserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
         UpdateUserResponseDTO response = userService.update(id, dto);
@@ -85,6 +91,10 @@ public class UserController {
             description = "Deletes an existing users by its ID.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "User successfully deleted"),
+                    @ApiResponse(responseCode = "403", description = "Access dened",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponseDTO.class),
+                                    examples = @ExampleObject(value = SwaggerConstants.UNAUTHORIZED_ERROR))),
                     @ApiResponse(responseCode = "404", description = "User not found",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
@@ -94,6 +104,7 @@ public class UserController {
                                     schema = @Schema(implementation = ErrorResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
+    @PreAuthorize("#id == authentication.principal.id")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {
         userService.deleteUser(id);

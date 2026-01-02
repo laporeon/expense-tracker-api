@@ -2,10 +2,12 @@ package com.laporeon.expensetracker.exceptions;
 
 import com.laporeon.expensetracker.dtos.response.ErrorResponseDTO;
 import com.laporeon.expensetracker.dtos.response.ValidationErrorResponseDTO;
+import com.laporeon.expensetracker.helpers.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -86,6 +88,18 @@ public class GlobalExceptionHandler {
                 Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        log.warn("Authorization denied for user: {}", SecurityUtils.getCurrentUserId());
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                HttpStatus.FORBIDDEN.value(),
+                "Access denied - insufficient permissions for this action",
+                Instant.now());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(Exception.class)
