@@ -1,7 +1,7 @@
 package com.laporeon.expensetracker.config;
 
+import com.laporeon.expensetracker.helpers.JwtTokenProvider;
 import com.laporeon.expensetracker.repositories.UserRepository;
-import com.laporeon.expensetracker.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
     @Override
@@ -34,8 +34,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             String token = recoverToken(request);
 
             if (token != null) {
-                String login = tokenService.validateToken(token);
-                var user = userRepository.findById(login).orElse(null);
+                String userId = jwtTokenProvider.validateToken(token);
+                var user = userRepository.findById(userId).orElse(null);
 
                 if (user != null) {
                     var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -43,7 +43,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            log.error("An unexpected error occured while trying to validate the token: {}", ex);
+            log.error("An unexpected error occurred while trying to validate the token: {}", ex);
             SecurityContextHolder.clearContext();
         }
 

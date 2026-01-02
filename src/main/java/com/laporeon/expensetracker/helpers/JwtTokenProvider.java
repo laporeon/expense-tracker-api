@@ -16,7 +16,7 @@ public class TokenService {
     private static final int TOKEN_EXPIRATION_TIME_IN_SECONDS = 7200;
     private static final String ISSUER = "expense-tracker-api-auth";
 
-    @Value("${api.security.token.secret}")
+    @Value("${jwt.secret}")
     private String jwtSecretKey;
 
     public String generateToken(User user) {
