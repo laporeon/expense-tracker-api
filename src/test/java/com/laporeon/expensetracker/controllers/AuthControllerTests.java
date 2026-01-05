@@ -6,6 +6,7 @@ import com.laporeon.expensetracker.dtos.request.LoginRequestDTO;
 import com.laporeon.expensetracker.dtos.request.RegisterRequestDTO;
 import com.laporeon.expensetracker.dtos.response.LoginResponseDTO;
 import com.laporeon.expensetracker.dtos.response.RegisterResponseDTO;
+import com.laporeon.expensetracker.dtos.response.UserResponseDTO;
 import com.laporeon.expensetracker.exceptions.AlreadyRegisteredException;
 import com.laporeon.expensetracker.services.AuthService;
 import org.bson.types.ObjectId;
@@ -19,6 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -53,6 +56,7 @@ public class AuthControllerTests {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private String validId;
+    private UserResponseDTO mockedUserResponseDTO;
     private RegisterResponseDTO mockedRegisterResponse;
     private LoginResponseDTO mockedLoginResponse;
 
@@ -60,16 +64,29 @@ public class AuthControllerTests {
     void setUp() {
         validId = new ObjectId().toString();
 
-        mockedRegisterResponse = new RegisterResponseDTO(
+        mockedUserResponseDTO = new UserResponseDTO(
                 validId,
                 VALID_NAME,
                 VALID_EMAIL,
-                null
+                "USER",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+
+        mockedRegisterResponse = new RegisterResponseDTO(
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "Bearer",
+                mockedUserResponseDTO
         );
 
         mockedLoginResponse = new LoginResponseDTO(
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "Bearer",
+                mockedUserResponseDTO
         );
+
     }
 
     @Test
@@ -87,8 +104,10 @@ public class AuthControllerTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(validRequest)))
                .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.name").value(VALID_NAME))
-               .andExpect(jsonPath("$.email").value(VALID_EMAIL));
+               .andExpect(jsonPath("$.type").value("Bearer"))
+               .andExpect(jsonPath("$.token").isNotEmpty())
+               .andExpect(jsonPath("$.user.name").value(VALID_NAME))
+               .andExpect(jsonPath("$.user.email").value(VALID_EMAIL));
     }
 
     @Test
