@@ -13,6 +13,7 @@ services:
       MONGO_USER: ${MONGO_USER:-admin}
       MONGO_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
       MONGO_DATABASE: ${MONGO_DATABASE:-expensetrackerdb}
+      JWT_SECRET: ${JWT_SECRET:-supersecretkey}
     depends_on:
       - mongodb
     networks:
@@ -20,7 +21,7 @@ services:
 
   mongodb:
     container_name: expense-tracker-database
-    image: mongo:latest
+    image: mongo:8.0.17-noble
     restart: unless-stopped
     ports:
       - "27018:27017"
