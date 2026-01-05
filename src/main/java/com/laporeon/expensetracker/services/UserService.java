@@ -1,10 +1,11 @@
 package com.laporeon.expensetracker.services;
 
 import com.laporeon.expensetracker.dtos.request.UpdateUserRequestDTO;
-import com.laporeon.expensetracker.dtos.response.UpdateUserResponseDTO;
+import com.laporeon.expensetracker.dtos.response.UserResponseDTO;
 import com.laporeon.expensetracker.entities.User;
 import com.laporeon.expensetracker.exceptions.AlreadyRegisteredException;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
+import com.laporeon.expensetracker.mappers.UserMapper;
 import com.laporeon.expensetracker.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,9 +18,10 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Transactional
-    public UpdateUserResponseDTO update(String id, UpdateUserRequestDTO dto) {
+    public UserResponseDTO update(String id, UpdateUserRequestDTO dto) {
         User user = userRepository.findByIdAndActiveTrue(id)
                                   .orElseThrow(() -> new ResourceNotFoundException("User not found or inactive"));
 
@@ -31,11 +33,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return new UpdateUserResponseDTO(
-                user.getName(),
-                user.getEmail(),
-                user.getUpdatedAt()
-        );
+        return userMapper.toResponseDTO(user);
     }
 
     @Transactional
@@ -47,15 +45,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
-    @Transactional
-    public void reactivate(String id) {
-        User user = userRepository.findByIdAndActiveFalse(id)
-                                  .orElseThrow(() -> new ResourceNotFoundException("User not found or already active"));
-
-        user.setActive(true);
-        userRepository.save(user);
-    }
 
     private void applyUpdates(User user, UpdateUserRequestDTO dto) {
         if (dto.name() != null) user.setName(dto.name());

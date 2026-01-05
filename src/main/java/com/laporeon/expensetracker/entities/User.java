@@ -35,6 +35,9 @@ public class User implements UserDetails {
 
     private String password;
 
+    @Builder.Default
+    private Role role = Role.USER;
+
     @Field(name = "is_active")
     @Builder.Default
     private boolean isActive = true;
@@ -47,6 +50,9 @@ public class User implements UserDetails {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Field(name = "last_accessed_at")
+    private LocalDateTime lastAccessedAt;
+
     @Override
     public String getUsername() {
         return email;
@@ -54,7 +60,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
 }

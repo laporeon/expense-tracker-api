@@ -2,7 +2,7 @@ package com.laporeon.expensetracker.controllers;
 
 import com.laporeon.expensetracker.dtos.request.UpdateUserRequestDTO;
 import com.laporeon.expensetracker.dtos.response.ErrorResponseDTO;
-import com.laporeon.expensetracker.dtos.response.UpdateUserResponseDTO;
+import com.laporeon.expensetracker.dtos.response.UserResponseDTO;
 import com.laporeon.expensetracker.dtos.response.ValidationErrorResponseDTO;
 import com.laporeon.expensetracker.helpers.SwaggerConstants;
 import com.laporeon.expensetracker.services.UserService;
@@ -36,7 +36,7 @@ public class UserController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "User information updated",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UpdateUserResponseDTO.class),
+                                    schema = @Schema(implementation = UserResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.USER_UPDATE_SUCCESS))),
                     @ApiResponse(responseCode = "400", description = "Request validation failed for one or more fields",
                             content = @Content(mediaType = "application/json",
@@ -61,30 +61,11 @@ public class UserController {
             })
     @PreAuthorize("#id == authentication.principal.id")
     @PutMapping("/{id}")
-    public ResponseEntity<UpdateUserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
-        UpdateUserResponseDTO response = userService.update(id, dto);
+    public ResponseEntity<UserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
+        UserResponseDTO response = userService.update(id, dto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @Operation(
-            summary = "Reactivates an user profile",
-            description = "Reactivates an inactive user profile by ID. Only inactive users can be reactivated.",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "User profile successfully reactivated"),
-                    @ApiResponse(responseCode = "404", description = "User not found",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.USER_NOT_FOUND_ERROR))),
-                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponseDTO.class),
-                                    examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
-            })
-    @PutMapping("/{id}/reactivate")
-    public ResponseEntity<Void> reactivateUserProfile(@PathVariable("id") String id) {
-        userService.reactivate(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
 
     @Operation(
             summary = "Delete an user",
