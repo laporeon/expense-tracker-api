@@ -18,15 +18,26 @@ public class SwaggerConfiguration {
                         new Info()
                                 .title("Expense Tracker API")
                                 .description("""
-                                            A REST API for personal finance management.
-                                            
-                                            ## Features
-                                            - Expense tracking with categories
-                                            - User profile management
-                                            - Soft delete support
-                                            - Pagination and sorting
-                                            """)
-                                            .version("1.0.0")
+                                          A REST API for personal finance management.
+                                          
+                                          ## Features
+                                          - Expense tracking with categories
+                                          - User profile management
+                                          - Soft delete support
+                                          - Pagination and sorting
+                                          
+                                          ## Authentication
+                                          This API uses **JWT (JSON Web Token)** for authentication.
+                                  
+                                          ### How to use:
+                                          1. Register at `/api/v1/auth/register` or login with an existing user at `/api/v1/auth/login`
+                                          2. Copy the returned JWT token (it starts with `eyJ...`)
+                                          3. Click on the **Authorize** button (🔒) at the top of this page
+                                          4. Paste the **FULL** token into the field
+                                          5. Click **Authorize** and then **Close**
+                                          6. All protected endpoints will now show a closed lock 🔒
+                                          """)
+                                .version("1.0.0")
                                 .license(
                                         new License()
                                                 .name("MIT")
