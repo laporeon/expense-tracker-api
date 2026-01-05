@@ -1,10 +1,10 @@
-package com.laporeon.user_registration_system;
+package com.laporeon.expensetracker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserRegistrationSystemApplicationTests {
+class ExpenseTrackerApplicationTests {
 
 	@Test
 	void contextLoads() {

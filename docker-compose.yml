@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: expense-tracker-api
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    environment:
+      PORT: ${PORT:-8080}
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USER: ${MONGO_USER:-admin}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
+      MONGO_DATABASE: ${MONGO_DATABASE:-expensetrackerdb}
+      JWT_SECRET: ${JWT_SECRET:-supersecretkey}
+    depends_on:
+      - mongodb
+    networks:
+      - expense-tracker-network
+
+  mongodb:
+    container_name: expense-tracker-database
+    image: mongo:8.0.17-noble
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - expense-tracker-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  expense-tracker-network:
+    name: expense-tracker-network
+    driver: bridge
