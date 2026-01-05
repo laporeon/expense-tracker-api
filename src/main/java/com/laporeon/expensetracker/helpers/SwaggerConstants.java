@@ -6,16 +6,33 @@ public class SwaggerConstants {
 
     public static final String REGISTER_SUCCESS = """
             {
-              "id": "6949a13ea23ea0e5b43d6068",
-              "name": "John Doe",
-              "email": "johndoe@gmail.com",
-              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJleHBlbnNlLXRyYWNrZXItYXBpLWF1dGgiLCJzdWIiOiI2OTQ5YTEzZWEyM2VhMGU1YjQzZDYwNjgiLCJpYXQiOjE3NjY0MzMwODYsImV4cCI6MTc2NjQ0MDI4Nn0.wzEwLBKtzdNwWGxcr6crkhNq6aEWjsbvAqQBTr4aYgM"
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...",
+              "type": "Bearer ",
+              "user": {
+                "id": "695be6d8e616c1a927046f52",
+                "name": "John Doe",
+                "email": "johndoea@gmail.com",
+                "role": "USER",
+                "createdAt": "2026-01-05T13:29:12.868935321",
+                "updatedAt": "2026-01-05T13:29:12.868935321",
+                "lastAccessedAt": "2026-01-05T13:29:12.868562932"
+              }
             }
             """;
 
     public static final String LOGIN_SUCCESS = """
             {
-              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJleHBlbnNlLXRyYWNrZXItYXBpLWF1dGgiLCJzdWIiOiI2OTQ5YTEzZWEyM2VhMGU1YjQzZDYwNjgiLCJpYXQiOjE3NjY0MzMwODYsImV4cCI6MTc2NjQ0MDI4Nn0.wzEwLBKtzdNwWGxcr6crkhNq6aEWjsbvAqQBTr4aYgM"
+              "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...",
+              "type": "Bearer ",
+              "user": {
+                "id": "695be6d8e616c1a927046f52",
+                "name": "John Doe",
+                "email": "johndoea@gmail.com",
+                "role": "USER",
+                "createdAt": "2026-01-05T13:29:12.868935321",
+                "updatedAt": "2026-01-05T13:29:12.868935321",
+                "lastAccessedAt": "2026-01-05T13:29:12.868562932"
+              }
             }
             """;
 
@@ -23,6 +40,14 @@ public class SwaggerConstants {
             {
               "status": 401,
               "message": "Invalid email or password",
+              "timestamp": "2025-12-23T18:18:54.698703304Z"
+            }
+            """;
+
+    public static final String LOGOU_ERROR = """
+            {
+              "status": 401,
+              "message": "Invalid or missing token",
               "timestamp": "2025-12-23T18:18:54.698703304Z"
             }
             """;

@@ -2,7 +2,10 @@ package com.laporeon.expensetracker.controllers;
 
 import com.laporeon.expensetracker.dtos.request.LoginRequestDTO;
 import com.laporeon.expensetracker.dtos.request.RegisterRequestDTO;
-import com.laporeon.expensetracker.dtos.response.*;
+import com.laporeon.expensetracker.dtos.response.ErrorResponseDTO;
+import com.laporeon.expensetracker.dtos.response.LoginResponseDTO;
+import com.laporeon.expensetracker.dtos.response.RegisterResponseDTO;
+import com.laporeon.expensetracker.dtos.response.ValidationErrorResponseDTO;
 import com.laporeon.expensetracker.helpers.SwaggerConstants;
 import com.laporeon.expensetracker.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +37,7 @@ public class AuthController {
             responses = {
                     @ApiResponse(responseCode = "201", description = "User registered",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UpdateUserResponseDTO.class),
+                                    schema = @Schema(implementation = RegisterResponseDTO.class),
                                     examples = @ExampleObject(value = SwaggerConstants.REGISTER_SUCCESS))),
                     @ApiResponse(responseCode = "400", description = "Request validation failed for one or more fields",
                             content = @Content(mediaType = "application/json",
@@ -78,4 +81,5 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
 }
