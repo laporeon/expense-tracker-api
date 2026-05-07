@@ -15,7 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +39,7 @@ public class AuthService {
 
         return new RegisterResponseDTO(
                 token,
-                "Bearer ",
+                "Bearer",
                 userMapper.toResponseDTO(user)
         );
     }
@@ -51,7 +51,7 @@ public class AuthService {
 
         String token = jwtTokenProvider.generateToken(user);
 
-        user.setLastAccessedAt(LocalDateTime.now());
+        user.recordAccess(Instant.now());
         userRepository.save(user);
 
         return new LoginResponseDTO(
@@ -60,6 +60,5 @@ public class AuthService {
                 userMapper.toResponseDTO(user)
         );
     }
-
 
 }

@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -21,15 +23,16 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public UserResponseDTO update(String id, UpdateUserRequestDTO dto) {
-        User user = userRepository.findByIdAndActiveTrue(id)
+    public UserResponseDTO update(UUID id, UpdateUserRequestDTO dto) {
+        User user = userRepository.findByIdAndIsActiveTrue(id)
                                   .orElseThrow(() -> new ResourceNotFoundException("User not found or inactive"));
 
         if (userRepository.existsByEmail(dto.email())) {
             throw new AlreadyRegisteredException("Email already registered");
         }
 
-        applyUpdates(user, dto);
+        String encodedPassword = dto.password() != null ? passwordEncoder.encode(dto.password()) : null;
+        user.update(dto, encodedPassword);
 
         userRepository.save(user);
 
@@ -37,19 +40,12 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(String id) {
-        User user = userRepository.findByIdAndActiveTrue(id)
+    public void deleteUser(UUID id) {
+        User user = userRepository.findByIdAndIsActiveTrue(id)
                                   .orElseThrow(() -> new ResourceNotFoundException("User not found or inactive"));
 
-        user.setActive(false);
+        user.deactivate();
         userRepository.save(user);
-    }
-
-
-    private void applyUpdates(User user, UpdateUserRequestDTO dto) {
-        if (dto.name() != null) user.setName(dto.name());
-        if (dto.email() != null) user.setEmail(dto.email());
-        if (dto.password() != null)  user.setPassword(passwordEncoder.encode(dto.password()));
     }
 
 }
