@@ -1,5 +1,6 @@
-package com.laporeon.expensetracker.entities;
+package com.laporeon.expensetracker.enums;
 
 public enum Role {
-    ADMIN, USER
+    ADMIN,
+    USER
 }
