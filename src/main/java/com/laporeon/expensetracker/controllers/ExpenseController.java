@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -120,7 +121,7 @@ public class ExpenseController {
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @GetMapping("/{id}")
-    public ResponseEntity<ExpenseResponseDTO> findExpense(@PathVariable("id") String id) {
+    public ResponseEntity<ExpenseResponseDTO> findExpense(@PathVariable("id") UUID id) {
         ExpenseResponseDTO response = expenseService.findExpense(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -151,7 +152,7 @@ public class ExpenseController {
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @PatchMapping("/{id}")
-    public ResponseEntity<ExpenseResponseDTO> updateExpense(@PathVariable("id") String id, @Valid @RequestBody UpdateExpenseRequestDTO dto) {
+    public ResponseEntity<ExpenseResponseDTO> updateExpense(@PathVariable("id") UUID id, @Valid @RequestBody UpdateExpenseRequestDTO dto) {
         ExpenseResponseDTO response = expenseService.updateExpense(id, dto);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -172,7 +173,7 @@ public class ExpenseController {
                                     examples = @ExampleObject(value = SwaggerConstants.SERVER_ERROR))),
             })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {
+    public ResponseEntity<Void> deleteExpense(@PathVariable("id") UUID id) {
         expenseService.deleteExpense(id);
 
         return ResponseEntity.noContent().build();
