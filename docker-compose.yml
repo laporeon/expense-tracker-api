@@ -5,34 +5,45 @@ services:
     ports:
       - "${PORT:-8080}:${PORT:-8080}"
     environment:
-      PORT: ${PORT:-8080}
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_USER: ${MONGO_USER:-admin}
-      MONGO_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
-      MONGO_DATABASE: ${MONGO_DATABASE:-expensesdb}
-      JWT_SECRET: ${JWT_SECRET:-supersecretkey}
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-dev}"
+      PORT: "${PORT:-8080}"
+      PG_USERNAME: "${PG_USERNAME:-admin}"
+      PG_PASSWORD: "${PG_PASSWORD:-dbpassword}"
+      POSTGRES_DB: "${POSTGRES_DB:-expenses_db}"
+      POSTGRES_HOST: postgresql
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-here}
+    env_file:
+      - path: .env
+        required: false
     depends_on:
-      - mongodb
+      postgresql:
+        condition: service_healthy
     networks:
       - expense-tracker-network
 
-  mongodb:
+  postgresql:
     container_name: expense-tracker-database
-    image: mongo:8.0.17-noble
+    image: postgres:18-alpine
     restart: unless-stopped
     ports:
-      - "27018:27017"
+      - "5433:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-dbpassword}
+      POSTGRES_USER: "${PG_USERNAME:-admin}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD:-dbpassword}"
+      POSTGRES_DB: "${POSTGRES_DB:-expenses_db}"
     volumes:
-      - mongodb_data:/data/db
+      - expensetracker_postgres_data:/var/lib/postgresql
     networks:
       - expense-tracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${PG_USERNAME} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 volumes:
-  mongodb_data:
+  expensetracker_postgres_data:
     driver: local
 
 networks:
