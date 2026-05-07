@@ -44,14 +44,6 @@ public class SwaggerConstants {
             }
             """;
 
-    public static final String LOGOU_ERROR = """
-            {
-              "status": 401,
-              "message": "Invalid or missing token",
-              "timestamp": "2025-12-23T18:18:54.698703304Z"
-            }
-            """;
-
     // ===== USER EXAMPLES =====
 
     public static final String USER_UPDATE_SUCCESS = """

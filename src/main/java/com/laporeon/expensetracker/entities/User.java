@@ -1,66 +1,115 @@
 package com.laporeon.expensetracker.entities;
 
+import com.laporeon.expensetracker.dtos.request.UpdateUserRequestDTO;
+import com.laporeon.expensetracker.enums.Role;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
-@Document(collection = "users")
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity
+@Table(name = "users")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 public class User implements UserDetails {
 
-    @MongoId
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Indexed(unique = true, name = "idx_email")
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String password;
 
-    @Builder.Default
-    private Role role = Role.USER;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private Role role;
 
-    @Field(name = "is_active")
-    @Builder.Default
-    private boolean isActive = true;
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
 
-    @Field(name = "created_at")
-    @CreatedDate
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @Field(name = "updated_at")
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
-    @Field(name = "last_accessed_at")
-    private LocalDateTime lastAccessedAt;
+    @Column(name = "last_accessed_at", nullable = false)
+    private Instant lastAccessedAt;
 
-    @Override
-    public String getUsername() {
-        return email;
+    public static User createRegisteredUser(String name, String email, String encodedPassword) {
+        Instant now = Instant.now();
+        return User.builder()
+                   .name(name)
+                   .email(email)
+                   .password(encodedPassword)
+                   .role(Role.USER)
+                   .isActive(true)
+                   .createdAt(now)
+                   .updatedAt(now)
+                   .lastAccessedAt(now)
+                   .build();
+    }
+
+    public void update(UpdateUserRequestDTO dto, String encodedPassword) {
+        if (dto.name() != null) this.name = dto.name();
+        if (dto.email() != null) this.email = dto.email();
+        if (encodedPassword != null) this.password = encodedPassword;
+        this.updatedAt = Instant.now();
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+        this.updatedAt = Instant.now();
+    }
+
+    public void recordAccess(Instant at) {
+        this.lastAccessedAt = at;
+        this.updatedAt = Instant.now();
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
+    public Collection<? extends GrantedAuthority> getAuthorities() { return List.of(); }
+
+    @Override
+    public String getUsername() { return email; }
+
+    @Override
+    public boolean isAccountNonExpired() { return isActive; }
+
+    @Override
+    public boolean isAccountNonLocked() { return isActive; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return isActive; }
+
+    @Override
+    public boolean isEnabled() { return isActive; }
 
 }

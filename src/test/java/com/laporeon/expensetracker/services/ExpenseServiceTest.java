@@ -10,12 +10,12 @@ import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
 import com.laporeon.expensetracker.helpers.SecurityUtils;
 import com.laporeon.expensetracker.mappers.ExpenseMapper;
 import com.laporeon.expensetracker.repositories.ExpenseRepository;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -27,24 +27,24 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ExpenseService Tests")
 public class ExpenseServiceTest {
 
-    private static final String VALID_NAME = "Prime Video";
-    private static final String VALID_DESCRIPTION = "Prime Video annual subscription.";
-    private static final BigDecimal VALID_AMOUNT = BigDecimal.valueOf(199.90);
-    private static final Category VALID_CATEGORY = Category.SUBSCRIPTIONS;
-    private static final LocalDate VALID_EXPENSE_DATE = LocalDate.of(2025, 12, 18);
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 10;
 
@@ -59,28 +59,20 @@ public class ExpenseServiceTest {
 
     private Expense mockedExpenseEntity;
     private ExpenseResponseDTO mockedExpenseResponse;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String userId;
+    private UUID userId;
     private MockedStatic<SecurityUtils> mockedSecurity;
 
     @BeforeEach
     void setUp() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        userId = new ObjectId().toString();
+        userId = UUID.randomUUID();
+        mockedExpenseEntity = Expense.create(
+                "Prime Video",
+                "Prime Video annual subscription.",
+                BigDecimal.valueOf(199.90),
+                Category.SUBSCRIPTIONS,
+                userId,
+                LocalDate.of(2025, 12, 18));
 
-        mockedExpenseEntity = Expense.builder()
-                                     .id(new ObjectId().toString())
-                                     .name(VALID_NAME)
-                                     .description(VALID_DESCRIPTION)
-                                     .amount(VALID_AMOUNT)
-                                     .category(VALID_CATEGORY)
-                                     .date(VALID_EXPENSE_DATE)
-                                     .userId(userId)
-                                     .createdAt(createdAt)
-                                     .updatedAt(updatedAt)
-                                     .build();
 
         mockedExpenseResponse = new ExpenseResponseDTO(
                 mockedExpenseEntity.getId(),
@@ -105,23 +97,22 @@ public class ExpenseServiceTest {
     @Test
     @DisplayName("Should save Expense successfully when given valid request data")
     void shouldSaveExpenseSuccessfullyWhenGivenValidRequestData() {
-        CreateExpenseRequestDTO requestDTO = new CreateExpenseRequestDTO(
-                VALID_NAME,
-                VALID_DESCRIPTION,
-                VALID_AMOUNT,
-                VALID_CATEGORY.toString(),
-                VALID_EXPENSE_DATE);
+        CreateExpenseRequestDTO request = new CreateExpenseRequestDTO(
+                "Prime Video",
+                "Prime Video annual subscription.",
+                 BigDecimal.valueOf(199.90),
+                Category.SUBSCRIPTIONS.toString(),
+                LocalDate.of(2025, 12, 18));
 
-        when(expenseMapper.toEntity(any(CreateExpenseRequestDTO.class), any(
-                String.class))).thenReturn(mockedExpenseEntity);
+        when(expenseMapper.toEntity(any(CreateExpenseRequestDTO.class), any(UUID.class))).thenReturn(mockedExpenseEntity);
         when(expenseRepository.save(any(Expense.class))).thenReturn(mockedExpenseEntity);
         when(expenseMapper.toDTO(any(Expense.class))).thenReturn(mockedExpenseResponse);
 
-        ExpenseResponseDTO response = expenseService.addExpense(requestDTO);
+        ExpenseResponseDTO response = expenseService.addExpense(request);
 
         assertThat(response.id()).isEqualTo(mockedExpenseResponse.id());
         assertThat(response.name()).isEqualTo(mockedExpenseResponse.name());
-        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.createdAt()).isEqualTo(mockedExpenseResponse.createdAt());
 
         verify(expenseRepository, times(1)).save(any(Expense.class));
     }
@@ -154,6 +145,72 @@ public class ExpenseServiceTest {
         assertThat(result.totalElements()).isEqualTo(1);
         assertThat(result.content()).hasSize(1);
         verify(expenseRepository, times(1)).findAllByUserId(userId, pageable);
+    }
+
+    @Test
+    @DisplayName("Should use date range query when startDate and endDate are provided")
+    void shouldUseDateRangeQueryWhenStartDateAndEndDateAreProvided() {
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE);
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        Page<Expense> expectedPage = new PageImpl<>(List.of(mockedExpenseEntity), pageable, 1L);
+
+        when(expenseRepository.findByUserIdAndDateBetween(userId, startDate, endDate, pageable)).thenReturn(expectedPage);
+        when(expenseMapper.toPageResponseDTO(expectedPage)).thenReturn(new PageResponseDTO<>(List.of(mockedExpenseResponse), 0, 10, 1, 1, 1, true, true, false, true, false));
+
+        expenseService.listAllExpenses(pageable, startDate, endDate);
+
+        verify(expenseRepository).findByUserIdAndDateBetween(userId, startDate, endDate, pageable);
+        verify(expenseRepository, never()).findByUserIdAndDateGreaterThanEqual(any(), any(), any());
+        verify(expenseRepository, never()).findByUserIdAndDateLessThanEqual(any(), any(), any());
+        verify(expenseRepository, never()).findAllByUserId(any(), any());
+    }
+
+    @Test
+    @DisplayName("Should use startDate query when only startDate is provided")
+    void shouldUseStartDateQueryWhenOnlyStartDateIsProvided() {
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE);
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        Page<Expense> expectedPage = new PageImpl<>(List.of(mockedExpenseEntity), pageable, 1L);
+
+        when(expenseRepository.findByUserIdAndDateGreaterThanEqual(userId, startDate, pageable)).thenReturn(expectedPage);
+        when(expenseMapper.toPageResponseDTO(expectedPage)).thenReturn(new PageResponseDTO<>(List.of(mockedExpenseResponse), 0, 10, 1, 1, 1, true, true, false, true, false));
+
+        expenseService.listAllExpenses(pageable, startDate, null);
+
+        verify(expenseRepository).findByUserIdAndDateGreaterThanEqual(userId, startDate, pageable);
+        verify(expenseRepository, never()).findByUserIdAndDateBetween(any(), any(), any(), any());
+        verify(expenseRepository, never()).findByUserIdAndDateLessThanEqual(any(), any(), any());
+        verify(expenseRepository, never()).findAllByUserId(any(), any());
+    }
+
+    @Test
+    @DisplayName("Should use endDate query when only endDate is provided")
+    void shouldUseEndDateQueryWhenOnlyEndDateIsProvided() {
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        Page<Expense> expectedPage = new PageImpl<>(List.of(mockedExpenseEntity), pageable, 1L);
+
+        when(expenseRepository.findByUserIdAndDateLessThanEqual(userId, endDate, pageable)).thenReturn(expectedPage);
+        when(expenseMapper.toPageResponseDTO(expectedPage)).thenReturn(
+                new PageResponseDTO<>(List.of(mockedExpenseResponse),
+                        0,
+                        10,
+                        1,
+                        1,
+                        1,
+                        true,
+                        true,
+                        false,
+                        true,
+                        false));
+
+        expenseService.listAllExpenses(pageable, null, endDate);
+
+        verify(expenseRepository).findByUserIdAndDateLessThanEqual(userId, endDate, pageable);
+        verify(expenseRepository, never()).findByUserIdAndDateBetween(any(), any(), any(), any());
+        verify(expenseRepository, never()).findByUserIdAndDateGreaterThanEqual(any(), any(), any());
+        verify(expenseRepository, never()).findAllByUserId(any(), any());
     }
 
     @Test
@@ -205,7 +262,7 @@ public class ExpenseServiceTest {
     @Test
     @DisplayName("Should throw ResourceNotFoundException when id does not exist")
     void shouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
-        String invalidId = "68e0234a70424186e056e45f";
+        UUID invalidId = UUID.randomUUID();
 
         when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 
@@ -217,34 +274,50 @@ public class ExpenseServiceTest {
     @Test
     @DisplayName("Should successfully update expense when given existing id and valid request data")
     void shouldUpdateExpenseWhenGivenExistingIdAndValidRequestData() {
-        UpdateExpenseRequestDTO requestDTO = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
+        String updatedDescription = "Updated subscription description";
+        UpdateExpenseRequestDTO request = new UpdateExpenseRequestDTO(null, updatedDescription, null, null, null);
 
         when(expenseRepository.findByIdAndUserId(mockedExpenseEntity.getId(), userId)).thenReturn(Optional.of(mockedExpenseEntity));
-        when(expenseMapper.toDTO(any(Expense.class))).thenReturn(mockedExpenseResponse);
+        when(expenseMapper.toDTO(any(Expense.class))).thenAnswer(invocation -> {
+            Expense expense = invocation.getArgument(0);
+            return new ExpenseResponseDTO(
+                    expense.getId(),
+                    expense.getName(),
+                    expense.getDescription(),
+                    expense.getAmount(),
+                    expense.getCategory(),
+                    expense.getDate(),
+                    expense.getCreatedAt(),
+                    expense.getUpdatedAt()
+            );
+        });
         when(expenseRepository.save(any(Expense.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
 
-        ExpenseResponseDTO response = expenseService.updateExpense(mockedExpenseEntity.getId(), requestDTO);
-
-        assertThat(response.id()).isEqualTo(mockedExpenseResponse.id());
-        assertThat(response.name()).isEqualTo(mockedExpenseResponse.name());
-        assertThat(response.createdAt()).isEqualTo(mockedExpenseResponse.createdAt());
-        assertThat(response.updatedAt()).isNotNull();
+        ExpenseResponseDTO response = expenseService.updateExpense(mockedExpenseEntity.getId(), request);
+        ArgumentCaptor<Expense> savedExpenseCaptor = ArgumentCaptor.forClass(Expense.class);
 
         verify(expenseRepository, times(1)).findByIdAndUserId(mockedExpenseEntity.getId(), userId);
-        verify(expenseRepository, times(1)).save(any(Expense.class));
+        verify(expenseRepository, times(1)).save(savedExpenseCaptor.capture());
+
+        Expense savedExpense = savedExpenseCaptor.getValue();
+        assertThat(savedExpense.getDescription()).isEqualTo(updatedDescription);
+
+        assertThat(response.id()).isEqualTo(savedExpense.getId());
+        assertThat(response.description()).isEqualTo(updatedDescription);
     }
 
     @Test
     @DisplayName("Should throw ResourceNotFoundException when updating expense with non existing id")
     void shouldThrowResourceNotFoundExceptionWhenUpdatingExpenseWithNonExistingId() {
-        String invalidId = "68e0234a70424186e056e45f";
-        UpdateExpenseRequestDTO requestDTO = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
+        UUID invalidId = UUID.randomUUID();
+        String updatedDescription = "Updated subscription description";
+        UpdateExpenseRequestDTO request = new UpdateExpenseRequestDTO(null, updatedDescription, null, null, null);
 
         when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> expenseService.updateExpense(invalidId, requestDTO));
+        assertThrows(ResourceNotFoundException.class, () -> expenseService.updateExpense(invalidId, request));
 
         verify(expenseRepository, times(1)).findByIdAndUserId(invalidId, userId);
     }
@@ -265,7 +338,7 @@ public class ExpenseServiceTest {
     @Test
     @DisplayName("Should throw ResourceNotFoundException when deleting expense with non existing id")
     void shouldThrowResourceNotFoundExceptionWhenDeletingExpenseWithNonExistingId() {
-        String invalidId = "68e0234a70424186e056e45f";
+        UUID invalidId = UUID.randomUUID();
 
         when(expenseRepository.findByIdAndUserId(invalidId, userId)).thenReturn(Optional.empty());
 

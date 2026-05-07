@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -61,7 +63,7 @@ public class UserController {
             })
     @PreAuthorize("#id == authentication.principal.id")
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> update(@PathVariable("id") String id, @Valid @RequestBody UpdateUserRequestDTO dto) {
+    public ResponseEntity<UserResponseDTO> update(@PathVariable("id") UUID id, @Valid @RequestBody UpdateUserRequestDTO dto) {
         UserResponseDTO response = userService.update(id, dto);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -87,7 +89,7 @@ public class UserController {
             })
     @PreAuthorize("#id == authentication.principal.id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable("id") String id) {
+    public ResponseEntity<Void> deleteExpense(@PathVariable("id") UUID id) {
         userService.deleteUser(id);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

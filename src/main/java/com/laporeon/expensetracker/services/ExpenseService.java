@@ -5,7 +5,6 @@ import com.laporeon.expensetracker.dtos.request.UpdateExpenseRequestDTO;
 import com.laporeon.expensetracker.dtos.response.ExpenseResponseDTO;
 import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
 import com.laporeon.expensetracker.entities.Expense;
-import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
 import com.laporeon.expensetracker.helpers.SecurityUtils;
 import com.laporeon.expensetracker.mappers.ExpenseMapper;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -49,41 +49,33 @@ public class ExpenseService {
         return expenseMapper.toPageResponseDTO(expensesPage);
     }
 
-    public ExpenseResponseDTO findExpense(String id) {
+    public ExpenseResponseDTO findExpense(UUID id) {
         Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(
-                                                   () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
+                                                    () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
                                            );
 
         return expenseMapper.toDTO(expense);
     }
 
-    public void deleteExpense(String id) {
+    public void deleteExpense(UUID id) {
         Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(
-                                                   () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
+                                                    () -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id))
                                            );
 
         expenseRepository.delete(expense);
     }
 
     @Transactional
-    public ExpenseResponseDTO updateExpense(String id, UpdateExpenseRequestDTO dto) {
+    public ExpenseResponseDTO updateExpense(UUID id, UpdateExpenseRequestDTO dto) {
         Expense expense = expenseRepository.findByIdAndUserId(id, SecurityUtils.getCurrentUserId())
                                            .orElseThrow(() -> new ResourceNotFoundException("Expense with id '%s' not found".formatted(id)));
 
-        applyUpdates(expense, dto);
+        expense.update(dto);
         expenseRepository.save(expense);
 
         return expenseMapper.toDTO(expense);
-    }
-
-    private void applyUpdates(Expense expense, UpdateExpenseRequestDTO dto) {
-        if (dto.name() != null) expense.setName(dto.name());
-        if (dto.description() != null) expense.setDescription(dto.description());
-        if (dto.amount() != null) expense.setAmount(dto.amount());
-        if (dto.category() != null) expense.setCategory(Category.fromString(dto.category()));
-        if (dto.date() != null) expense.setDate(dto.date());
     }
 
 }
