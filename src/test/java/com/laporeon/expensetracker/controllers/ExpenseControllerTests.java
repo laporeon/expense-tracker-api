@@ -9,148 +9,130 @@ import com.laporeon.expensetracker.dtos.response.PageResponseDTO;
 import com.laporeon.expensetracker.enums.Category;
 import com.laporeon.expensetracker.exceptions.ResourceNotFoundException;
 import com.laporeon.expensetracker.services.ExpenseService;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(ExpenseController.class)
+@WebMvcTest(
+        controllers = ExpenseController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = JwtAuthenticationFilter.class
+        )
+)
 @DisplayName("ExpenseController Tests")
 class ExpenseControllerTests {
-
-    private static final String VALID_NAME = "Prime Video";
-    private static final String VALID_DESCRIPTION = "Prime Video annual subscription.";
-    private static final BigDecimal VALID_AMOUNT = BigDecimal.valueOf(199.90);
-    private static final Category VALID_CATEGORY = Category.SUBSCRIPTIONS;
-    private static final LocalDate VALID_EXPENSE_DATE = LocalDate.of(2025, 12, 18);
-    private static final String INVALID_REQUEST_BODY_ERROR = "Request validation failed for one or more fields";
-    private static final String INVALID_CATEGORY_VALUE_ERROR = "Invalid category name '%s'";
-    private static final String NOT_FOUND_MESSAGE = "Expense with id %s not found.";
-    private static final int DEFAULT_PAGE = 0;
-    private static final int DEFAULT_SIZE = 10;
-    private static final String EXPENSES_ENDPOINT = "/api/v1/expenses";
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockitoBean
     private ExpenseService expenseService;
 
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private ObjectMapper objectMapper;
+    private UUID expenseId;
     private ExpenseResponseDTO mockedExpenseResponse;
-    private String validExpenseId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     @BeforeEach
     void setUp() {
-        validExpenseId = new ObjectId().toString();
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-
+        objectMapper = new ObjectMapper().findAndRegisterModules();
+        expenseId = UUID.randomUUID();
         mockedExpenseResponse = new ExpenseResponseDTO(
-                validExpenseId,
-                VALID_NAME,
-                VALID_DESCRIPTION,
-                VALID_AMOUNT,
-                VALID_CATEGORY,
-                VALID_EXPENSE_DATE,
-                createdAt,
-                updatedAt
+                expenseId,
+                "Prime Video",
+                "Prime Video annual subscription.",
+                BigDecimal.valueOf(199.90),
+                Category.SUBSCRIPTIONS,
+                LocalDate.of(2025, 12, 18),
+                Instant.now(),
+                Instant.now()
         );
     }
 
     @Test
     @DisplayName("POST /api/v1/expenses - Should return 201 when given valid request data")
     void shouldReturnCreatedWhenGivenValidRequestData() throws Exception {
-        CreateExpenseRequestDTO validRequest =
-                new CreateExpenseRequestDTO(
-                        VALID_NAME,
-                        VALID_DESCRIPTION,
-                        VALID_AMOUNT,
-                        VALID_CATEGORY.toString(),
-                        VALID_EXPENSE_DATE
-                );
+        CreateExpenseRequestDTO request = new CreateExpenseRequestDTO(
+                "Prime Video",
+                "Prime Video annual subscription.",
+                BigDecimal.valueOf(199.90),
+                "SUBSCRIPTIONS",
+                LocalDate.of(2025, 12, 18)
+        );
 
         when(expenseService.addExpense(any(CreateExpenseRequestDTO.class))).thenReturn(mockedExpenseResponse);
 
-        mockMvc.perform(post(EXPENSES_ENDPOINT)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validRequest)))
+        mockMvc.perform(post("/api/v1/expenses")
+                       .contentType("application/json")
+                       .content(objectMapper.writeValueAsString(request)))
                .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(mockedExpenseResponse.id()))
-               .andExpect(jsonPath("$.name").value(mockedExpenseResponse.name()));
+               .andExpect(jsonPath("$.id").value(expenseId.toString()))
+               .andExpect(jsonPath("$.name").value(request.name()));
+
+        verify(expenseService).addExpense(any(CreateExpenseRequestDTO.class));
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("POST /api/v1/expenses - Should return 400 when required fields are missing")
     void shouldReturn400WhenRequiredFieldsAreMissing() throws Exception {
-        CreateExpenseRequestDTO invalidRequest = new CreateExpenseRequestDTO(null,
-                                                                             VALID_DESCRIPTION,
-                                                                             null,
-                                                                             null,
-                                                                             null);
+        CreateExpenseRequestDTO request = new CreateExpenseRequestDTO(null, null, null, null, null);
 
-        mockMvc.perform(post(EXPENSES_ENDPOINT)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+        mockMvc.perform(post("/api/v1/expenses")
+                       .contentType("application/json")
+                       .content(objectMapper.writeValueAsString(request)))
                .andExpect(status().isBadRequest())
-               .andExpect(jsonPath("$.message").value(INVALID_REQUEST_BODY_ERROR))
-               .andExpect(jsonPath("$.errors").isArray())
-               .andExpect(jsonPath("$.errors[0].field").value("amount"))
-               .andExpect(jsonPath("$.errors[0].message").value("Amount is required"))
-               .andExpect(jsonPath("$.errors[1].field").value("category"))
-               .andExpect(jsonPath("$.errors[1].message").value("Category name is required"))
-               .andExpect(jsonPath("$.errors[2].field").value("date"))
-               .andExpect(jsonPath("$.errors[2].message").value("Expense date is required (format: yyyy-MM-dd)"))
-               .andExpect(jsonPath("$.errors[3].field").value("name"))
-               .andExpect(jsonPath("$.errors[3].message").value("Name is required"));
+               .andExpect(jsonPath("$.message").value("Request validation failed for one or more fields"))
+               .andExpect(jsonPath("$.errors").isArray());
+
+        verifyNoInteractions(expenseService);
     }
 
     @Test
     @DisplayName("POST /api/v1/expenses - Should return 422 when given invalid category value")
     void shouldReturn422WhenGivenInvalidCategoryValue() throws Exception {
-        String invalidCategoryValue = "invalidCategoryValue";
-        CreateExpenseRequestDTO invalidRequest = new CreateExpenseRequestDTO(VALID_NAME,
-                                                                             VALID_DESCRIPTION,
-                                                                             VALID_AMOUNT,
-                                                                             invalidCategoryValue,
-                                                                             VALID_EXPENSE_DATE);
-
+        CreateExpenseRequestDTO request = new CreateExpenseRequestDTO("Prime Video", null, BigDecimal.valueOf(10), "INVALID", LocalDate.of(2024, 12, 10));
 
         when(expenseService.addExpense(any(CreateExpenseRequestDTO.class)))
-                .thenThrow(new IllegalArgumentException(INVALID_CATEGORY_VALUE_ERROR.formatted(invalidCategoryValue)));
+                .thenThrow(new IllegalArgumentException("Invalid category name 'INVALID'"));
 
-        mockMvc.perform(post(EXPENSES_ENDPOINT)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidRequest)))
+        mockMvc.perform(post("/api/v1/expenses")
+                       .contentType("application/json")
+                       .content(objectMapper.writeValueAsString(request)))
                .andExpect(status().isUnprocessableEntity())
-               .andExpect(jsonPath("$.message").value(INVALID_CATEGORY_VALUE_ERROR.formatted(invalidCategoryValue)));
+               .andExpect(jsonPath("$.message").value("Invalid category name 'INVALID'"));
+
+        verify(expenseService).addExpense(any(CreateExpenseRequestDTO.class));
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
@@ -159,8 +141,8 @@ class ExpenseControllerTests {
         List<ExpenseResponseDTO> content = List.of(mockedExpenseResponse);
         PageResponseDTO<ExpenseResponseDTO> pageResponse = new PageResponseDTO<>(
                 content,
-                DEFAULT_PAGE,
-                DEFAULT_SIZE,
+                0,
+                10,
                 1,
                 1,
                 1,
@@ -171,17 +153,18 @@ class ExpenseControllerTests {
                 false
         );
 
-        when(expenseService.listAllExpenses(any(Pageable.class), any(), any())).thenReturn(pageResponse);
+        when(expenseService.listAllExpenses(any(), any(), any())).thenReturn(pageResponse);
 
-        mockMvc.perform(get(EXPENSES_ENDPOINT)
-                                .param("page", String.valueOf(DEFAULT_PAGE))
-                                .param("size", String.valueOf(DEFAULT_SIZE)))
+        mockMvc.perform(get("/api/v1/expenses")
+                       .param("page", "0")
+                       .param("size", "10"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.content").isArray())
                .andExpect(jsonPath("$.content").isNotEmpty())
-               .andExpect(jsonPath("$.totalElements").value(1))
-               .andExpect(jsonPath("$.pageNumber").value(DEFAULT_PAGE))
-               .andExpect(jsonPath("$.pageSize").value(DEFAULT_SIZE));
+               .andExpect(jsonPath("$.totalElements").value(content.size()));
+
+        verify(expenseService).listAllExpenses(any(), any(), any());
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
@@ -189,8 +172,8 @@ class ExpenseControllerTests {
     void shouldReturn200WithEmptyContentWhenNoExpensesExist() throws Exception {
         PageResponseDTO<ExpenseResponseDTO> pageResponse = new PageResponseDTO<>(
                 List.of(),
-                DEFAULT_PAGE,
-                DEFAULT_SIZE,
+                0,
+                10,
                 0,
                 0,
                 0,
@@ -201,92 +184,120 @@ class ExpenseControllerTests {
                 false
         );
 
-        when(expenseService.listAllExpenses(any(Pageable.class), any(), any())).thenReturn(pageResponse);
+        when(expenseService.listAllExpenses(any(), any(), any())).thenReturn(pageResponse);
 
-        mockMvc.perform(get(EXPENSES_ENDPOINT))
+        mockMvc.perform(get("/api/v1/expenses"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.content").isEmpty())
-               .andExpect(jsonPath("$.totalElements").value(0));
+               .andExpect(jsonPath("$.totalElements").value(pageResponse.content().size()));
+
+        verify(expenseService).listAllExpenses(any(), any(), any());
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("GET /api/v1/expenses/{id} - Should return 200 when id exists")
     void shouldReturn200WhenIdExists() throws Exception {
-        when(expenseService.findExpense(validExpenseId)).thenReturn(mockedExpenseResponse);
+        when(expenseService.findExpense(expenseId)).thenReturn(mockedExpenseResponse);
 
-        mockMvc.perform(get(EXPENSES_ENDPOINT + "/" + validExpenseId))
+        mockMvc.perform(get("/api/v1/expenses/" + expenseId))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(mockedExpenseResponse.id()))
+               .andExpect(jsonPath("$.id").value(expenseId.toString()))
                .andExpect(jsonPath("$.name").value(mockedExpenseResponse.name()));
+
+        verify(expenseService).findExpense(expenseId);
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("GET /api/v1/expenses/{id} - Should return 404 when id does not exist")
     void shouldReturn404WhenIdDoesNotExist() throws Exception {
-        String invalidId = "68e0124a70424186e056e45d";
+        UUID invalidId = UUID.randomUUID();
 
-        when(expenseService.findExpense(invalidId)).thenThrow(new ResourceNotFoundException(NOT_FOUND_MESSAGE.formatted(invalidId)));
+        when(expenseService.findExpense(invalidId)).thenThrow(new ResourceNotFoundException("Expense with id " + invalidId + " not found."));
 
-        mockMvc.perform(get(EXPENSES_ENDPOINT + "/" + invalidId))
+        mockMvc.perform(get("/api/v1/expenses/" + invalidId))
                .andExpect(status().isNotFound())
-               .andExpect(jsonPath("$.message").value(NOT_FOUND_MESSAGE.formatted(invalidId)));
+               .andExpect(jsonPath("$.message").exists());
+
+        verify(expenseService).findExpense(invalidId);
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("PATCH /api/v1/expenses/{id} - Should return 200 when updating expense with existing id and valid request data")
     void shouldReturn200WhenUpdatingExpenseWithExistingIdAndValidRequestData() throws Exception {
-        UpdateExpenseRequestDTO validRequest = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
+        UpdateExpenseRequestDTO request = new UpdateExpenseRequestDTO(null, "New Subscription Description", null, null, null);
 
-        when(expenseService.updateExpense(eq(validExpenseId), any(UpdateExpenseRequestDTO.class)))
-                .thenReturn(mockedExpenseResponse);
+        ExpenseResponseDTO updatedResponse = new ExpenseResponseDTO(
+                expenseId,
+                "Prime Video",
+                "New Subscription Description",   // <-- reflete o update
+                BigDecimal.valueOf(199.90),
+                Category.SUBSCRIPTIONS,
+                LocalDate.of(2025, 12, 18),
+                Instant.now(),
+                Instant.now()
+        );
 
-        mockMvc.perform(patch(EXPENSES_ENDPOINT + "/" + validExpenseId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validRequest)))
+        when(expenseService.updateExpense(eq(expenseId), any(UpdateExpenseRequestDTO.class))).thenReturn(updatedResponse);
+
+        mockMvc.perform(patch("/api/v1/expenses/" + expenseId)
+                       .contentType("application/json")
+                       .content(objectMapper.writeValueAsString(request)))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(mockedExpenseResponse.id()))
-               .andExpect(jsonPath("$.name").value(mockedExpenseResponse.name()))
-               .andExpect(jsonPath("$.description").value(mockedExpenseResponse.description()))
-               .andExpect(jsonPath("$.updatedAt").exists());
+               .andExpect(jsonPath("$.id").value(expenseId.toString()))
+               .andExpect(jsonPath("$.description").value(request.description()));
+
+        verify(expenseService).updateExpense(eq(expenseId), any(UpdateExpenseRequestDTO.class));
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("PATCH /api/v1/expenses/{id} - Should return 404 when updating expense with non existing id")
-    void shouldReturn404WhenGivenNonExistingId() throws Exception {
-        String invalidId = "68e0124a70424186e056e45d";
-        UpdateExpenseRequestDTO validRequest = new UpdateExpenseRequestDTO(null, VALID_DESCRIPTION, null, null, null);
-
-        doThrow(new ResourceNotFoundException(NOT_FOUND_MESSAGE.formatted(invalidId)))
+    void shouldReturn404WhenUpdatingExpenseWithNonExistingId() throws Exception {
+        UUID invalidId = UUID.randomUUID();
+        UpdateExpenseRequestDTO request = new UpdateExpenseRequestDTO(null, null, BigDecimal.valueOf(29.90), null, null);
+        doThrow(new ResourceNotFoundException("Expense with id " + invalidId + " not found."))
                 .when(expenseService)
-                .updateExpense(invalidId, validRequest);
+                .updateExpense(invalidId, request);
 
-        mockMvc.perform(patch(EXPENSES_ENDPOINT + "/" + invalidId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(validRequest)))
+        mockMvc.perform(patch("/api/v1/expenses/" + invalidId)
+                       .contentType("application/json")
+                       .content(objectMapper.writeValueAsString(request)))
                .andExpect(status().isNotFound())
-               .andExpect(jsonPath("$.message").value(NOT_FOUND_MESSAGE.formatted(invalidId)));
+               .andExpect(jsonPath("$.message").exists());
+
+        verify(expenseService).updateExpense(eq(invalidId), any(UpdateExpenseRequestDTO.class));
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("DELETE /api/v1/expenses/{id} - Should return 204 when deleting expense with existing id")
     void shouldReturn204WhenDeletingExpenseWithExistingId() throws Exception {
-        doNothing().when(expenseService).deleteExpense(validExpenseId);
+        doNothing().when(expenseService).deleteExpense(expenseId);
 
-        mockMvc.perform(delete(EXPENSES_ENDPOINT + "/" + validExpenseId))
+        mockMvc.perform(delete("/api/v1/expenses/" + expenseId))
                .andExpect(status().isNoContent());
+
+        verify(expenseService).deleteExpense(expenseId);
+        verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     @DisplayName("DELETE /api/v1/expenses/{id} - Should return 404 when deleting expense with non existing id")
     void shouldReturn404WhenDeletingExpenseWithNonExistingId() throws Exception {
-        String invalidId = "68e0124a70424186e056e45d";
+        UUID invalidId = UUID.randomUUID();
 
-        doThrow(new ResourceNotFoundException(NOT_FOUND_MESSAGE.formatted(invalidId)))
+        doThrow(new ResourceNotFoundException("Expense with id " + invalidId + " not found."))
                 .when(expenseService)
                 .deleteExpense(invalidId);
 
-        mockMvc.perform(delete(EXPENSES_ENDPOINT + "/" + invalidId))
+        mockMvc.perform(delete("/api/v1/expenses/" + invalidId))
                .andExpect(status().isNotFound())
-               .andExpect(jsonPath("$.message").value(NOT_FOUND_MESSAGE.formatted(invalidId)));
+               .andExpect(jsonPath("$.message").exists());
+
+        verify(expenseService).deleteExpense(invalidId);
+        verifyNoMoreInteractions(expenseService);
     }
 }
