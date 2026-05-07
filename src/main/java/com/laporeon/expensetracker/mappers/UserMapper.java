@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
@@ -16,11 +14,11 @@ public class UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     public User toEntity(RegisterRequestDTO dto) {
-        return User.builder()
-                   .name(dto.name())
-                   .email(dto.email())
-                   .password(passwordEncoder.encode(dto.password()))
-                   .lastAccessedAt(LocalDateTime.now()).build();
+        return User.createRegisteredUser(
+                dto.name(),
+                dto.email(),
+                passwordEncoder.encode(dto.password())
+        );
     }
 
     public UserResponseDTO toResponseDTO(User user) {
@@ -28,11 +26,11 @@ public class UserMapper {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole().name(),
+                user.getRole(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getLastAccessedAt()
         );
     }
-    
+
 }
