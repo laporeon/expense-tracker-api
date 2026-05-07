@@ -1,11 +1,11 @@
 package com.laporeon.expensetracker.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "com.laporeon.expensetracker.repositories")
-@EnableMongoAuditing
-public class MongoConfiguration {
+@EnableJpaAuditing
+@EnableJpaRepositories(basePackages = "com.laporeon.expensetracker.repositories")
+public class DatabaseConfiguration {
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -35,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (token != null) {
                 String userId = jwtTokenProvider.validateToken(token);
-                var user = userRepository.findById(userId).orElse(null);
+                var user = userRepository.findById(UUID.fromString(userId)).orElse(null);
 
                 if (user != null) {
                     var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
