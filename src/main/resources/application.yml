@@ -1,0 +1,38 @@
+# ====== SERVER ======
+server.port=${PORT:8080}
+
+# ====== GENERAL ======
+spring.application.name=expense-tracker-api
+
+# ====== DATABASE ======
+spring.datasource.url=jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:expenses_db}
+spring.datasource.username=${POSTGRES_USER}
+spring.datasource.password=${POSTGRES_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# ====== JPA/HIBERNATE ======
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# ====== FLYWAY ======
+spring.flyway.enabled=true
+spring.flyway.baseline-on-migrate=true
+spring.flyway.locations=classpath:db/migration
+spring.flyway.validate-on-migrate=true
+
+# ====== LOGGING ======
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.orm.jdbc.bind=TRACE
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+logging.level.com.laporeon=DEBUG
+
+# ===== JWT Security configuration =====
+jwt.secret=${JWT_SECRET:supersecretkey}
+
+# ====== SWAGGER ======
+springdoc.swagger-ui.path=/docs
+springdoc.api-docs.path=/api-docs
+springdoc.swagger-ui.tags-sorter=alpha
+springdoc.swagger-ui.operations-sorter=alpha
