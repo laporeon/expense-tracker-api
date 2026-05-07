@@ -1,14 +1,17 @@
 package com.laporeon.expensetracker.dtos.response;
 
-import java.time.LocalDateTime;
+import com.laporeon.expensetracker.enums.Role;
+
+import java.time.Instant;
+import java.util.UUID;
 
 public record UserResponseDTO(
-        String id,
+        UUID id,
         String name,
         String email,
-        String role,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        LocalDateTime lastAccessedAt
+        Role role,
+        Instant createdAt,
+        Instant updatedAt,
+        Instant lastAccessedAt
 ) {
 }

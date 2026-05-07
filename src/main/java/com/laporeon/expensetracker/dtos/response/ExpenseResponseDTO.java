@@ -3,17 +3,18 @@ package com.laporeon.expensetracker.dtos.response;
 import com.laporeon.expensetracker.enums.Category;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record ExpenseResponseDTO(
-        String id,
+        UUID id,
         String name,
         String description,
         BigDecimal amount,
         Category category,
         LocalDate expenseDate,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
