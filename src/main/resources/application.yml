@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: expense-tracker-api
+  config:
+    import: optional:file:.env[.properties]
 
   # ====== DATABASE ======
   datasource:
@@ -59,3 +61,22 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /api-docs
+
+# ====== ACTUATOR ======
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s,5s
