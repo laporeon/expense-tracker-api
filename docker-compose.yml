@@ -12,9 +12,6 @@ services:
       POSTGRES_DB: "${POSTGRES_DB:-expenses_db}"
       POSTGRES_HOST: postgresql
       JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-here}
-    env_file:
-      - path: .env
-        required: false
     depends_on:
       postgresql:
         condition: service_healthy
