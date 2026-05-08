@@ -61,24 +61,30 @@ docker compose up -d --build
 
 Then access the application at `http://localhost:8080/` (or the port you configured).
 
-> [!NOTE]
-> **Optionally**, you can override any environment variables with your own settings.
-> To do so, configure environment variables:
-> ```bash
-> cp .env.example .env
-> # Edit .env with your local values
-> ```
+**Optionally**, you can override any environment variables with your own settings.
+```bash
+cp .env.example .env
+# Edit .env with your local values
+```
 
 ### Running Locally (Without Docker)
 
 1. Create a PostgreSQL database
-2. Set required environment variables:
-```bash
-export PG_USERNAME=<your-postgresql-user-here>
-export PG_PASSWORD=<your-postgresql-password-here>
-export POSTGRES_DB=<database-name>
-export JWT_SECRET=<jwt-secret-here>
-```
+2. Set the required environment variables using **either** method below:
+    - **Option 1: Using `.env` file**. Copy the example file and edit with your values:
+      ```bash
+      cp .env.example .env
+      # Edit .env with your local settings
+      ```
+
+    - **Option 2: Exporting via shell**
+      ```bash
+      export PG_USERNAME=<your-postgresql-user-here>
+      export PG_PASSWORD=<your-postgresql-password-here>
+      export POSTGRES_DB=<database-name>
+      export JWT_SECRET=<jwt-secret-here>
+      ```
+
 3. (Optional) Set server port:
 ```bash
 export PORT=8081
